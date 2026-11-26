@@ -928,7 +928,6 @@
     const tbody = $('scheduleRows');
     tbody.replaceChildren();
 
-    // Dynamic Totals Variables
     let dynPrincipalTotal = 0;
     let dynInterestTotal = 0;
     let dynPaymentTotal = 0;
@@ -937,32 +936,23 @@
       const k = row.key;
       const isExt = row.isExt;
       const status = recordState[k + '_status'] || 'pending';
-
+      
       let pAmount = row.principalPortion;
       let iAmount = row.interest;
       
-      // Dynamic calculation based on "Amount" field
-      let amountTyped = recordState[k + '_amount'];
-      let hasAmountTyped = amountTyped !== undefined && amountTyped !== '';
-      let actualAmountPaid = hasAmountTyped ? Number(amountTyped) : row.paymentDue;
+      let hasAmountTyped = recordState[k + '_amount'] !== undefined && recordState[k + '_amount'] !== '';
+      let actualAmountPaid = hasAmountTyped ? Number(recordState[k + '_amount']) : 0;
 
       if (status === 'paid') {
-        if (hasAmountTyped) {
-           dynPrincipalTotal += pAmount; // Principal is always the scheduled portion
-           dynInterestTotal += Math.max(0, actualAmountPaid - pAmount); // Extra goes to interest
-           dynPaymentTotal += actualAmountPaid;
-        } else {
-           dynPrincipalTotal += pAmount;
-           dynInterestTotal += iAmount;
-           dynPaymentTotal += row.paymentDue;
-        }
+        dynPrincipalTotal += pAmount; 
+        dynInterestTotal += hasAmountTyped ? Math.max(0, actualAmountPaid - pAmount) : iAmount;
+        dynPaymentTotal += hasAmountTyped ? actualAmountPaid : row.paymentDue;
       } else if (status === 'overdue') {
         let fee = hasAmountTyped ? actualAmountPaid : (Math.ceil(pAmount * 0.10) + iAmount);
         dynPrincipalTotal += 0;
-        dynInterestTotal += fee;
+        dynInterestTotal += fee; 
         dynPaymentTotal += fee;
       } else {
-        // Pending uses scheduled amount
         dynPrincipalTotal += pAmount;
         dynInterestTotal += iAmount;
         dynPaymentTotal += row.paymentDue;
@@ -988,12 +978,11 @@
 
       if (status === 'overdue') {
         displayPrincipal = '—';
-        displayInterest = moneyFull(actualAmountPaid);
+        let fee = hasAmountTyped ? actualAmountPaid : (Math.ceil(pAmount * 0.10) + iAmount);
+        displayInterest = moneyFull(fee);
+        displayDue = moneyFull(fee);
+      } else if (status === 'paid' && hasAmountTyped) {
         displayDue = moneyFull(actualAmountPaid);
-      } else if (status === 'paid') {
-        displayDue = moneyFull(actualAmountPaid);
-        // Show the split visually
-        displayPrincipal = money(pAmount);
         displayInterest = money(Math.max(0, actualAmountPaid - pAmount));
       }
 
@@ -1052,7 +1041,7 @@
         recordState[k + '_amount'] = raw;
         const m = tdAmt.querySelector('.print-mirror');
         if (m) m.textContent = raw ? moneyFull(Number(raw)) : '—';
-        renderAdmin(); // Re-render to update totals dynamically
+        renderAdmin(); 
         renderSummaryTab();
       });
 
@@ -1089,12 +1078,10 @@
       tbody.appendChild(tr);
     });
 
-    // Update Top Summary Boxes
     $('principalOut').textContent = money(dynPrincipalTotal);
     $('interestOut').textContent = money(dynInterestTotal);
     $('totalOut').textContent = money(dynPaymentTotal);
 
-    // Update Table Footer Totals
     $('principalTotal').textContent = money(dynPrincipalTotal);
     $('interestTotal').textContent = money(dynInterestTotal);
     $('paymentTotal').textContent = money(dynPaymentTotal);
@@ -1134,7 +1121,7 @@
         if (status === 'paid') {
           const amtOverride = rs[row.key + '_amount'];
           const actualPaid = (amtOverride !== undefined && amtOverride !== '') ? Number(amtOverride) : row.paymentDue;
-          recProfit += Math.max(0, actualPaid - row.principalPortion); // Dynamic interest calculation
+          recProfit += Math.max(0, actualPaid - row.principalPortion);
         } else if (status === 'overdue') {
           const amtOverride = rs[row.key + '_amount'];
           const fee = (amtOverride !== undefined && amtOverride !== '') ? Number(amtOverride) : Math.ceil(row.principalPortion * 0.10) + row.interest;
@@ -1194,7 +1181,7 @@
           const amountPaid = hasOverride ? Number(amtOverride) : row.paymentDue;
           bucket.received += amountPaid;
           bucket.principalRet += row.principalPortion;
-          bucket.profit += Math.max(0, amountPaid - row.principalPortion); // Dynamic profit
+          bucket.profit += Math.max(0, amountPaid - row.principalPortion);
         } else if (status === 'overdue') {
           const overdueFee = hasOverride ? Number(amtOverride) : Math.ceil(row.principalPortion * 0.10) + row.interest;
           bucket.received += overdueFee;
