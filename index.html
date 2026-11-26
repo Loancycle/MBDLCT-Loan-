@@ -1,0 +1,1249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MBDLCT · Loan Manager</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --ink: #172033; --muted: #657087; --line: #d9deea; --soft: #f4f6fa;
+      --accent: #1e4f91; --accent-light: #e9eff9; --danger: #b3261e; --ok: #1b6b3a;
+      --warn-bg: #fff8e6; --warn-border: #e6c86a; --radius: 12px;
+      --shadow: 0 8px 20px rgba(0,0,0,0.02), 0 2px 6px rgba(0,20,50,0.03);
+    }
+    body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, Arial, sans-serif; background: #eef1f6; color: var(--ink); padding: 24px; line-height: 1.45; }
+    .app { max-width: 1200px; margin: 0 auto; }
+    
+    .header { margin-bottom: 20px; display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 16px; }
+    .header h1 { font-size: 27px; font-weight: 700; letter-spacing: -0.02em; display: flex; align-items: center; gap: 10px; }
+    .header h1 i { color: var(--accent); font-size: 28px; }
+    .sub { color: var(--muted); font-size: 15px; margin-left: 4px; }
+    .header-actions { display: flex; gap: 10px; align-items: center; }
+    .header-actions button { padding: 10px 18px; font-size: 13px; }
+
+    .tabs { display: flex; gap: 0; margin-bottom: 22px; border-bottom: 2px solid var(--line); }
+    .tab-btn { padding: 12px 24px; font-size: 14px; font-weight: 600; font-family: inherit; color: var(--muted); background: none; border: none; border-bottom: 2px solid transparent; margin-bottom: -2px; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: 0.15s; }
+    .tab-btn:hover { color: var(--accent); }
+    .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+    .tab-btn i { font-size: 15px; }
+    .tab-pane { display: none; }
+    .tab-pane.active { display: block; }
+
+    .panel { background: white; border: 1px solid var(--line); border-radius: var(--radius); padding: 20px 22px; margin-bottom: 18px; box-shadow: var(--shadow); }
+    .panel h2 { font-size: 17px; font-weight: 600; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; color: var(--ink); }
+    .panel h2 i { color: var(--accent); width: 20px; font-size: 16px; }
+
+    .records-strip { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 18px; }
+    .record-chip { background: white; border: 1px solid var(--line); border-radius: 30px; padding: 8px 16px 8px 12px; display: flex; align-items: center; gap: 10px; font-size: 13px; font-weight: 500; cursor: pointer; transition: 0.15s; box-shadow: var(--shadow); }
+    .record-chip:hover { border-color: var(--accent); background: var(--accent-light); }
+    .record-chip.active { border-color: var(--accent); background: var(--accent-light); box-shadow: 0 0 0 2px rgba(30,79,145,0.15); }
+    .record-chip .chip-name { max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .record-chip .chip-delete { color: var(--muted); font-size: 14px; margin-left: 4px; transition: 0.15s; }
+    .record-chip .chip-delete:hover { color: var(--danger); }
+
+    .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px 20px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px 20px; }
+    label { display: block; font-weight: 600; font-size: 13px; margin-bottom: 5px; color: #2a3348; letter-spacing: 0.01em; }
+    input, select { width: 100%; padding: 10px 12px; border: 1px solid #cbd2df; border-radius: 8px; font-family: inherit; font-size: 14px; background: white; color: var(--ink); transition: 0.15s; }
+    input:focus, select:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(30,79,145,0.08); }
+    .hint { font-size: 12px; color: var(--muted); margin-top: 6px; line-height: 1.4; }
+
+    .summary-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
+    .metric { background: var(--soft); border-radius: 10px; padding: 14px 16px; }
+    .metric .label { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.03em; color: var(--muted); }
+    .metric .value { font-size: 23px; font-weight: 700; margin-top: 6px; letter-spacing: -0.02em; overflow-wrap: anywhere; }
+
+    .table-container { overflow-x: auto; margin: 6px 0 4px; border-radius: 10px; border: 1px solid var(--line); }
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    th { background: var(--soft); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: #3a445c; padding: 10px 8px; text-align: left; border-bottom: 1px solid var(--line); white-space: nowrap; }
+    td { padding: 8px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+    tbody tr:last-child td { border-bottom: none; }
+    tfoot th { background: var(--soft); font-size: 12px; font-weight: 700; border-top: 1px solid var(--line); border-bottom: none; padding: 12px 8px; }
+    .num { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+    .col-separator { border-left: 2px solid #cbd2df; }
+
+    .record-input { padding: 7px 8px; font-size: 13px; border-radius: 6px; border: 1px solid #d0d7e5; background: white; }
+    .record-input.amount { text-align: right; }
+    .pay-status select { padding: 7px 8px; font-size: 13px; border-radius: 6px; border: 1px solid #d0d7e5; background: white; font-weight: 500; }
+    .pay-status select.overdue { color: var(--danger); font-weight: 700; border-color: var(--danger); background: #fff5f5; }
+    .pay-status select.paid { color: var(--ok); font-weight: 700; border-color: var(--ok); background: #f0f9f0; }
+
+    tr.row-paid td { background: #e8f5e9 !important; }
+    tr.row-overdue td { background: #fdecea !important; }
+
+    .extended-row td { background: var(--warn-bg); border-bottom: 2px solid var(--warn-border); }
+    .badge { display: inline-block; font-size: 10px; padding: 2px 7px; border-radius: 20px; background: #f8d77c; color: #6e4a00; font-weight: 700; letter-spacing: 0.02em; }
+    .badge i { margin-right: 3px; }
+
+    .print-mirror { display: none; }
+    .fineprint { font-size: 12px; color: var(--muted); margin-top: 10px; line-height: 1.5; }
+    .late-note { background: #fff5f5; border-left: 4px solid var(--danger); padding: 12px 16px; border-radius: 8px; font-size: 13px; margin-top: 16px; }
+
+    .signatures { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-top: 36px; }
+    .sig { border-top: 1px solid #333; padding-top: 8px; font-size: 12px; }
+    .sig-name { font-weight: 600; margin-bottom: 3px; }
+
+    .actions { display: flex; flex-wrap: wrap; gap: 12px; margin: 20px 0 12px; }
+    button { border: 0; border-radius: 9px; padding: 11px 20px; font-family: inherit; font-weight: 600; font-size: 14px; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; transition: 0.15s; background: white; color: var(--ink); border: 1px solid var(--line); }
+    button i { font-size: 14px; }
+    button.primary { background: var(--accent); color: white; border: 1px solid var(--accent); }
+    button.primary:hover { background: #16417a; }
+    button.save-btn { background: #1b6b3a; color: white; border: 1px solid #1b6b3a; }
+    button.save-btn:hover { background: #145a2e; }
+    button.secondary:hover { background: #f0f3f9; }
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .print-only { display: none; }
+    .empty-state { text-align: center; padding: 28px 20px; color: var(--muted); }
+    .empty-state i { font-size: 36px; color: var(--line); margin-bottom: 12px; }
+
+    /* MODAL */
+    .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 10000; }
+    .modal-content { background: white; padding: 30px; border-radius: var(--radius); width: 100%; max-width: 400px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+    .modal-content h2 { margin-bottom: 20px; font-size: 20px; }
+    .modal-content input { margin-bottom: 15px; }
+    .modal-content .actions { margin: 0; flex-direction: column; }
+    .modal-content button { width: 100%; justify-content: center; }
+    .auth-error { color: var(--danger); font-size: 13px; margin-bottom: 10px; display: none; }
+
+    /* CALENDAR */
+    .cal-controls { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 18px; }
+    .cal-controls .month-nav { display: flex; align-items: center; gap: 10px; }
+    .cal-controls .month-nav button { padding: 8px 14px; font-size: 13px; border-radius: 8px; }
+    .cal-controls .month-label { font-size: 18px; font-weight: 700; min-width: 180px; text-align: center; letter-spacing: -0.02em; }
+    .cal-legend { display: flex; gap: 16px; flex-wrap: wrap; font-size: 12px; color: var(--muted); align-items: center; }
+    .cal-legend span { display: flex; align-items: center; gap: 6px; }
+    .cal-legend .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+    .dot-pending { background: #e6a817; }
+    .dot-paid { background: var(--ok); }
+    .dot-overdue { background: var(--danger); }
+    .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin-bottom: 22px; }
+    .cal-head { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); text-align: center; padding: 8px 0; }
+    .cal-day { min-height: 100px; border: 1px solid var(--line); border-radius: 8px; padding: 6px; background: white; display: flex; flex-direction: column; gap: 4px; transition: 0.12s; }
+    .cal-day.other-month { background: #fafbfd; border-color: #eef0f5; opacity: 0.55; }
+    .cal-day.today { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(30,79,145,0.12); }
+    .cal-day .day-num { font-size: 12px; font-weight: 700; color: var(--muted); margin-bottom: 2px; }
+    .cal-day.today .day-num { color: var(--accent); }
+    .cal-day.other-month .day-num { color: #b8bfcc; }
+    .cal-entry { font-size: 11px; padding: 3px 6px; border-radius: 5px; background: var(--soft); border-left: 3px solid #e6a817; cursor: pointer; transition: 0.12s; line-height: 1.25; }
+    .cal-entry:hover { background: #eef2fa; transform: translateX(1px); }
+    .cal-entry.paid { border-left-color: var(--ok); background: #f0f9f0; }
+    .cal-entry.overdue { border-left-color: var(--danger); background: #fff5f5; }
+    .cal-entry .entry-name { font-weight: 600; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .cal-entry .entry-amount { color: var(--muted); font-size: 10px; font-variant-numeric: tabular-nums; }
+
+    .upcoming-list { display: flex; flex-direction: column; gap: 2px; }
+    .upcoming-item { display: flex; align-items: center; gap: 14px; padding: 12px 14px; border-radius: 10px; border: 1px solid var(--line); background: white; transition: 0.12s; cursor: pointer; }
+    .upcoming-item:hover { border-color: var(--accent); background: var(--accent-light); }
+    .upcoming-item .up-date { min-width: 100px; font-weight: 700; font-size: 13px; color: var(--accent); }
+    .upcoming-item .up-name { flex: 1; font-weight: 600; font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .upcoming-item .up-amount { font-size: 13px; font-weight: 700; font-variant-numeric: tabular-nums; }
+    .upcoming-item .up-status { font-size: 10px; font-weight: 700; text-transform: uppercase; padding: 3px 8px; border-radius: 20px; letter-spacing: 0.04em; }
+    .up-status.pending { background: #fff4d6; color: #8a6400; }
+    .up-status.paid { background: #e0f2e5; color: var(--ok); }
+    .up-status.overdue { background: #fde8e7; color: var(--danger); }
+    .upcoming-item .up-days { font-size: 11px; color: var(--muted); min-width: 70px; text-align: right; }
+    .upcoming-item .up-days.urgent { color: var(--danger); font-weight: 700; }
+
+    @media (max-width: 720px) {
+      body { padding: 14px; }
+      .grid-2, .grid-3, .summary-grid, .signatures { grid-template-columns: 1fr; gap: 14px; }
+      .header h1 { font-size: 21px; }
+      .panel { padding: 16px; }
+      .actions button { flex: 1 1 auto; justify-content: center; }
+      .cal-grid { gap: 2px; }
+      .cal-day { min-height: 70px; padding: 4px; }
+      .cal-entry { font-size: 10px; padding: 2px 4px; }
+      .tab-btn { padding: 10px 14px; font-size: 13px; }
+      .upcoming-item { flex-wrap: wrap; gap: 8px; }
+    }
+
+    @media print {
+      body { background: white; padding: 0; font-size: 11px; }
+      .app { max-width: none; }
+      .no-print, .actions, .hint, .sub, .records-strip, .header-actions, .tabs { display: none !important; }
+      .tab-pane { display: block !important; }
+      .panel { border: 0; border-radius: 0; padding: 6px 0; margin: 0; box-shadow: none; }
+      .header { text-align: center; margin-bottom: 8px; }
+      .header h1 { font-size: 18px; justify-content: center; }
+      .header h1 i { display: none; }
+      .summary-grid { gap: 6px; margin-bottom: 8px; }
+      .metric { border: 1px solid #bbb; background: white; padding: 8px; }
+      .metric .value { font-size: 15px; }
+      th, td { padding: 5px 4px; }
+      th { background: #eee !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .print-mirror { display: inline; }
+      .print-only { display: block; }
+      .signatures { margin-top: 36px; }
+      .col-separator { border-left: 1px solid #666; }
+      .table-container { border: 1px solid #ccc; }
+      .late-note { border-left-color: #b3261e; }
+      @page { size: A4 landscape; margin: 10mm; }
+    }
+  </style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div>
+      <h1><i class="fas fa-calculator"></i> MBDLCT · Loan Manager</h1>
+      <p class="sub">Create, track, and print client loan schedules.</p>
+    </div>
+    <div class="header-actions no-print">
+      <button class="secondary" id="loginBtn"><i class="fas fa-sign-in-alt"></i> Login to Save</button>
+      <button class="primary" id="newRecordBtn"><i class="fas fa-plus"></i> New Client</button>
+    </div>
+  </div>
+
+  <div class="tabs no-print">
+    <button class="tab-btn active" data-tab="calculatorTab"><i class="fas fa-calculator"></i> Calculator</button>
+    <button class="tab-btn" data-tab="summaryTab"><i class="fas fa-calendar-alt"></i> Summary &amp; Calendar</button>
+  </div>
+
+  <!-- CALCULATOR TAB -->
+  <div class="tab-pane active" id="calculatorTab">
+    <div class="records-strip no-print" id="recordsStrip"></div>
+
+    <section class="panel no-print">
+      <h2><i class="fas fa-user-circle"></i> 1. Client Information</h2>
+      <div class="grid-2">
+        <div>
+          <label for="client">Client full name</label>
+          <input id="client" placeholder="e.g. Maria Santos" autocomplete="off">
+        </div>
+        <div>
+          <label for="bankType">Bank / E-wallet Type</label>
+          <select id="bankType">
+            <option value="">Select bank / e-wallet</option>
+            <optgroup label="E-wallets & digital banks">
+              <option>GCash</option><option>Maya</option>
+              <option>GoTyme Bank</option><option>CIMB Bank Philippines</option>
+              <option>MariBank (formerly SeaBank)</option><option>Tonik Digital Bank</option>
+              <option>UNO Digital Bank</option><option>UnionDigital Bank</option>
+              <option>Overseas Filipino Bank (OFBank)</option>
+            </optgroup>
+            <optgroup label="Top Philippine banks (BSP)">
+              <option>BDO Unibank</option><option>Bank of the Philippine Islands (BPI)</option>
+              <option>Metropolitan Bank & Trust Company (Metrobank)</option>
+              <option>Land Bank of the Philippines (LANDBANK)</option>
+              <option>China Banking Corporation (China Bank)</option>
+              <option>Rizal Commercial Banking Corporation (RCBC)</option>
+              <option>Security Bank</option><option>Philippine National Bank (PNB)</option>
+              <option>Union Bank of the Philippines (UnionBank)</option>
+              <option>Development Bank of the Philippines (DBP)</option>
+            </optgroup>
+            <optgroup label="Other banks">
+              <option>EastWest Bank</option><option>Asia United Bank (AUB)</option>
+              <option>Bank of Commerce</option><option>Philippine Bank of Communications (PBCOM)</option>
+              <option>Maybank Philippines</option><option>HSBC Philippines</option>
+              <option>Other</option>
+            </optgroup>
+          </select>
+        </div>
+        <div>
+          <label for="bankName">Account Name</label>
+          <input id="bankName" placeholder="Account name" autocomplete="off">
+        </div>
+        <div>
+          <label for="bankNumber">Account Number</label>
+          <input id="bankNumber" placeholder="e.g. 1234 5678 90" inputmode="numeric" autocomplete="off">
+        </div>
+        <div>
+          <label for="guarantor">Guarantor's Full Name</label>
+          <input id="guarantor" placeholder="Full name" autocomplete="off">
+        </div>
+        <div>
+          <label for="refdate">Money release date</label>
+          <input id="refdate" type="date" required>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2><i class="fas fa-sliders-h"></i> 2. Loan Details</h2>
+      <div class="grid-2">
+        <div>
+          <label for="amount">Loan amount (₱)</label>
+          <input id="amount" type="number" min="1" step="1" value="10000" required>
+          <div class="hint">Any amount (no increment restriction).</div>
+        </div>
+        <div>
+          <label for="term">Loan term</label>
+          <select id="term">
+            <option value="15days">15 days</option>
+            <option value="1" selected>1 month</option>
+            <option value="2">2 months</option>
+            <option value="3">3 months</option>
+            <option value="4">4 months</option>
+            <option value="5">5 months</option>
+            <option value="6">6 months</option>
+            <option value="7">7 months</option>
+            <option value="8">8 months</option>
+            <option value="9">9 months</option>
+            <option value="10">10 months</option>
+            <option value="11">11 months</option>
+            <option value="12">12 months</option>
+          </select>
+        </div>
+        <div>
+          <label for="frequency">Payment frequency</label>
+          <select id="frequency">
+            <option value="biMonthly">Bi-Monthly (every 15 days)</option>
+            <option value="monthly">Monthly (every 30 days)</option>
+          </select>
+        </div>
+        <div>
+          <label for="rate">Monthly interest rate (%)</label>
+          <input id="rate" type="number" min="0" step="0.1" value="10">
+          <div class="hint">Default 10% per month. 15‑day terms use prorated interest (half).</div>
+        </div>
+      </div>
+      <p class="hint" style="margin-top:12px;">Payment dates are adjusted to the next valid cutoff: 5th, 10th, 15th, 20th, 25th, 30th, or last day of month.</p>
+    </section>
+
+    <section class="panel" id="printArea">
+      <div class="print-only" style="text-align:center; font-weight:700; margin-bottom:12px; font-size:13px;">
+        <i class="fas fa-file-invoice"></i> CLIENT LOAN COPY
+      </div>
+      <h2><i class="fas fa-chart-pie"></i> 3. Computation Summary</h2>
+
+      <div class="grid-2" style="margin-bottom:18px;">
+        <div><label>Client name</label><div id="outClient" style="font-weight:500;">—</div></div>
+        <div><label>Bank / E-wallet Type</label><div id="outBankType">—</div></div>
+        <div><label>Account Name</label><div id="outBankName">—</div></div>
+        <div><label>Account Number</label><div id="outBankNumber">—</div></div>
+        <div><label>Guarantor's Full Name</label><div id="outGuarantor">—</div></div>
+        <div><label>Money release date</label><div id="releaseDate" style="font-weight:600;">—</div></div>
+      </div>
+
+      <div class="summary-grid">
+        <div class="metric"><div class="label">Principal</div><div class="value" id="principalOut">₱0</div></div>
+        <div class="metric"><div class="label">Total interest</div><div class="value" id="interestOut">₱0</div></div>
+        <div class="metric"><div class="label">Total repayment</div><div class="value" id="totalOut">₱0</div></div>
+      </div>
+
+      <h2><i class="fas fa-table"></i> Payment Schedule &amp; Record</h2>
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th style="width:28px;">#</th>
+              <th>Payment date</th>
+              <th class="num">Principal</th>
+              <th class="num">Interest</th>
+              <th class="num">Payment due</th>
+              <th class="col-separator">Date of Payment</th>
+              <th class="num">Amount</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="scheduleRows"></tbody>
+          <tfoot>
+            <tr>
+              <th colspan="2">TOTAL</th>
+              <th class="num" id="principalTotal">—</th>
+              <th class="num" id="interestTotal">—</th>
+              <th class="num" id="paymentTotal">—</th>
+              <th class="col-separator" colspan="3"></th>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+
+      <p class="fineprint" id="calculationNote"></p>
+      <p class="fineprint late-note" id="lateNote"></p>
+
+      <div class="signatures">
+        <div>
+          <div class="sig-name" id="sigClient">—</div>
+          <div class="sig-label">Lender signature over printed name</div>
+        </div>
+        <div>
+          <div class="sig-name" id="sigGuarantor">—</div>
+          <div class="sig-label">Guarantor signature over printed name</div>
+        </div>
+      </div>
+      <p class="fineprint print-only" style="margin-top:20px;">This document is a loan computation and payment schedule. Confirm and document all agreed terms before disbursement.</p>
+    </section>
+
+    <div class="actions no-print">
+      <button class="primary" id="printBtn"><i class="fas fa-print"></i> Print / Save as PDF</button>
+      <button class="save-btn" id="saveRecordBtn" disabled><i class="fas fa-save"></i> Save Client Record</button>
+      <button class="secondary" id="resetBtn"><i class="fas fa-undo-alt"></i> Reset Form</button>
+      <button class="secondary" id="deleteRecordBtn"><i class="fas fa-trash-alt"></i> Delete This Record</button>
+    </div>
+    <p class="fineprint no-print" style="margin-top:4px;">Public users can calculate and print. Log in to save records and see your calendar.</p>
+  </div>
+
+  <!-- SUMMARY TAB -->
+  <div class="tab-pane" id="summaryTab">
+    
+    <!-- Auth Wall inside the tab -->
+    <div id="authWall" style="display:none; text-align:center; padding: 40px 20px; background: white; border-radius: var(--radius); border: 1px solid var(--line); box-shadow: var(--shadow);">
+      <i class="fas fa-lock" style="font-size: 40px; color: var(--muted); margin-bottom: 15px;"></i>
+      <h2>Log in to view your records</h2>
+      <p style="color: var(--muted); margin-bottom: 20px; font-size: 14px;">Your data is private and synced to your account.</p>
+      <button class="primary" onclick="document.getElementById('authModal').style.display='flex'">Log In Now</button>
+    </div>
+
+    <div id="summaryContent" style="display:none;">
+      <section class="panel">
+        <h2><i class="fas fa-chart-line"></i> Monthly Financial Summary</h2>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Month / Year</th>
+                <th class="num">Money Released (Principal)</th>
+                <th class="num">Total Money Received</th>
+                <th class="num">Principal Returned</th>
+                <th class="num">Interest / Profit Earned</th>
+              </tr>
+            </thead>
+            <tbody id="monthlySummaryRows"></tbody>
+          </table>
+        </div>
+        <p class="fineprint">This summary tracks all saved records. "Money Released" is based on the release date. "Money Received" and "Profit" are based on the schedule's Payment Date (Due Date).</p>
+      </section>
+
+      <div class="summary-grid" style="margin-bottom:20px;">
+        <div class="metric"><div class="label">Saved clients</div><div class="value" id="kpiClients">0</div></div>
+        <div class="metric"><div class="label">Due this month</div><div class="value" id="kpiDueMonth">₱0</div></div>
+        <div class="metric"><div class="label">Overdue / urgent</div><div class="value" id="kpiOverdue">0</div></div>
+      </div>
+
+      <section class="panel">
+        <div class="cal-controls">
+          <div class="month-nav">
+            <button class="secondary" id="prevMonth"><i class="fas fa-chevron-left"></i></button>
+            <div class="month-label" id="monthLabel">—</div>
+            <button class="secondary" id="nextMonth"><i class="fas fa-chevron-right"></i></button>
+            <button class="secondary" id="todayBtn" style="margin-left:8px;"><i class="fas fa-calendar-day"></i> Today</button>
+          </div>
+          <div class="cal-legend">
+            <span><span class="dot dot-pending"></span> Pending</span>
+            <span><span class="dot dot-paid"></span> Paid</span>
+            <span><span class="dot dot-overdue"></span> Overdue</span>
+          </div>
+        </div>
+        <div class="cal-grid" id="calGrid"></div>
+      </section>
+
+      <section class="panel">
+        <h2><i class="fas fa-list-ul"></i> Upcoming due dates</h2>
+        <div class="upcoming-list" id="upcomingList">
+          <div class="empty-state"><i class="fas fa-inbox"></i><p>No saved records yet. Save a client to see their due dates here.</p></div>
+        </div>
+      </section>
+    </div>
+  </div>
+</div>
+
+<!-- LOGIN MODAL -->
+<div class="modal-overlay" id="authModal">
+  <div class="modal-content">
+    <h2><i class="fas fa-lock" style="color:var(--accent);"></i> Secure Login</h2>
+    <div id="authError" class="auth-error"></div>
+    <input type="email" id="authEmail" placeholder="Email address" required>
+    <input type="password" id="authPassword" placeholder="Password" required>
+    <div class="actions">
+      <button class="primary" id="loginSubmitBtn">Log In</button>
+      <button class="secondary" id="signupSubmitBtn">Sign Up (First Time)</button>
+      <button class="secondary" id="closeAuthBtn" style="margin-top:10px; border:none;">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ==========================================
+  // SUPABASE CONFIGURATION
+  // ==========================================
+  const SUPABASE_URL = 'https://uzdrndauvmoggiahsqmb.supabase.co';
+  const SUPABASE_KEY = 'sb_publishable__6PSS_vkiWPqx_ViJF253w_2vmxAQWg';
+  const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  const $ = id => document.getElementById(id);
+
+  let currentUser = null;
+  let currentRecordId = null;
+  let recordState = {};
+  let savedRecords = [];
+  let calYear, calMonth;
+
+  const money = n => '₱' + Math.ceil(Number.isFinite(Number(n)) ? Number(n) : 0).toLocaleString('en-PH', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+  const moneyFull = n => '₱' + Number(Number.isFinite(Number(n)) ? Number(n) : 0).toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const parseDate = s => { if (!s) return new Date(); const [y,m,d] = s.split('-').map(Number); return new Date(y, m-1, d, 12, 0, 0); };
+  const addDays = (date, days) => { const d = new Date(date); d.setDate(d.getDate() + days); return d; };
+  const fmtDate = d => d.toLocaleDateString('en-PH', { year: 'numeric', month: 'long', day: 'numeric' });
+  const fmtShort = d => d.toLocaleDateString('en-PH', { month: 'short', day: 'numeric', year: 'numeric' });
+  const localIso = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  const lastDayOfMonth = (y, m) => new Date(y, m+1, 0).getDate();
+
+  function roundUpCutoff(target) {
+    let y = target.getFullYear(), m = target.getMonth();
+    let curDay = target.getDate();
+    for (let i = 0; i < 24; i++) {
+      const lastDay = lastDayOfMonth(y, m);
+      const validDays = [];
+      for (const d of [5,10,15,20,25,30]) {
+        if (d === 30 && lastDay < 30) validDays.push(lastDay);
+        else if (d <= lastDay) validDays.push(d);
+      }
+      const uniq = [...new Set(validDays)].sort((a,b) => a-b);
+      for (const day of uniq) {
+        if (day >= curDay) return new Date(y, m, day, 12, 0, 0);
+      }
+      m++; if (m > 11) { m = 0; y++; }
+      curDay = 1;
+    }
+    return target;
+  }
+
+  function escapeHtml(str) {
+    return String(str).replace(/[&<>"]/g, function(m) {
+      if (m === '&') return '&amp;'; if (m === '<') return '&lt;'; if (m === '>') return '&gt;'; if (m === '"') return '&quot;'; return m;
+    });
+  }
+
+  function sameDay(a,b) { return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate(); }
+
+  // ==========================================
+  // AUTH LOGIC
+  // ==========================================
+  async function checkAuth() {
+    const { data: { session } } = await sb.auth.getSession();
+    currentUser = session ? session.user : null;
+    updateUIForAuth();
+    if (currentUser) {
+      await loadRecordsFromSupabase();
+    } else {
+      savedRecords = [];
+      renderRecordsStrip();
+    }
+  }
+
+  function updateUIForAuth() {
+    const loginBtn = $('loginBtn');
+    const saveBtn = $('saveRecordBtn');
+    const authWall = $('authWall');
+    const summaryContent = $('summaryContent');
+
+    if (currentUser) {
+      loginBtn.innerHTML = '<i class="fas fa-sign-out-alt"></i> Logout';
+      loginBtn.onclick = () => sb.auth.signOut().then(() => location.reload());
+      saveBtn.disabled = false;
+      authWall.style.display = 'none';
+      summaryContent.style.display = 'block';
+    } else {
+      loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Login to Save';
+      loginBtn.onclick = () => $('authModal').style.display = 'flex';
+      saveBtn.disabled = true;
+      authWall.style.display = 'block';
+      summaryContent.style.display = 'none';
+    }
+  }
+
+  $('loginSubmitBtn').onclick = async () => {
+    const email = $('authEmail').value;
+    const password = $('authPassword').value;
+    const { error } = await sb.auth.signInWithPassword({ email, password });
+    if (error) {
+      $('authError').textContent = error.message;
+      $('authError').style.display = 'block';
+    } else {
+      $('authModal').style.display = 'none';
+      $('authError').style.display = 'none';
+      checkAuth();
+    }
+  };
+
+  $('signupSubmitBtn').onclick = async () => {
+    const email = $('authEmail').value;
+    const password = $('authPassword').value;
+    const { error } = await sb.auth.signUp({ email, password });
+    if (error) {
+      $('authError').textContent = error.message;
+      $('authError').style.display = 'block';
+    } else {
+      alert('Account created! You can now log in.');
+      $('authError').style.display = 'none';
+    }
+  };
+
+  $('closeAuthBtn').onclick = () => $('authModal').style.display = 'none';
+
+
+  // ==========================================
+  // DATABASE LOGIC
+  // ==========================================
+  async function loadRecordsFromSupabase() {
+    if (!currentUser) return;
+    const { data, error } = await sb.from('loans').select('*').order('updated_at', { ascending: false });
+    if (error) { console.error(error); return; }
+    
+    savedRecords = data.map(row => ({
+      id: row.id,
+      name: row.client_name,
+      inputs: row.record_data.inputs,
+      recordState: row.record_data.recordState
+    }));
+    
+    renderRecordsStrip();
+    render();
+    renderSummaryTab();
+  }
+
+  async function saveRecordToSupabase() {
+    if (!currentUser) return alert('Please log in first.');
+    
+    const inputs = getFormInputs();
+    const name = inputs.client.trim() || 'Unnamed client';
+    const payload = { name, inputs, recordState: { ...recordState } };
+
+    if (currentRecordId) {
+      // Update existing
+      const { error } = await sb.from('loans')
+        .update({ client_name: name, record_data: payload, updated_at: new Date() })
+        .eq('id', currentRecordId);
+      if (error) alert(error.message);
+    } else {
+      // Insert new
+      const { data, error } = await sb.from('loans')
+        .insert({ user_id: currentUser.id, client_name: name, record_data: payload })
+        .select();
+      if (error) alert(error.message);
+      else if (data) currentRecordId = data[0].id;
+    }
+    
+    await loadRecordsFromSupabase();
+    
+    const btn = $('saveRecordBtn');
+    const old = btn.innerHTML;
+    btn.innerHTML = '<i class="fas fa-check"></i> Saved!';
+    btn.disabled = true;
+    setTimeout(() => { btn.innerHTML = old; btn.disabled = false; }, 1200);
+  }
+
+  async function deleteRecordFromSupabase(id) {
+    if (!currentUser) return;
+    const { error } = await sb.from('loans').delete().eq('id', id);
+    if (error) alert(error.message);
+    else {
+      if (currentRecordId === id) { currentRecordId = null; recordState = {}; clearForm(); }
+      await loadRecordsFromSupabase();
+    }
+  }
+
+
+  // ==========================================
+  // CALCULATOR LOGIC (UNCHANGED)
+  // ==========================================
+  function getBaseRows(inputs) {
+    let principal = Math.round(Number(inputs.amount));
+    if (!Number.isFinite(principal) || principal < 1) principal = 1;
+    const termValue = inputs.term;
+    const is15 = termValue === '15days';
+    const months = is15 ? 0 : Math.max(1, Number(termValue) || 1);
+    const frequency = inputs.frequency || 'biMonthly';
+    const ratePct = Math.max(0, Number(inputs.rate) || 0);
+    const monthlyInterest = principal * ratePct / 100;
+
+    let count, intervalDays;
+    if (is15) { count = 1; intervalDays = 15; }
+    else if (frequency === 'biMonthly') { count = months * 2; intervalDays = 15; }
+    else { count = months; intervalDays = 30; }
+
+    let interestEach;
+    if (is15) interestEach = Math.ceil(monthlyInterest / 2);
+    else if (frequency === 'biMonthly') interestEach = Math.ceil(monthlyInterest / 2);
+    else interestEach = Math.ceil(monthlyInterest);
+
+    const principalEachBase = Math.ceil(principal / count);
+    const release = inputs.refdate ? parseDate(inputs.refdate) : new Date();
+
+    const baseRows = [];
+    let principalRemaining = principal;
+    let lastDueDate = release;
+
+    for (let i = 1; i <= count; i++) {
+      let due;
+      if (is15) due = roundUpCutoff(addDays(release, 15));
+      else due = roundUpCutoff(addDays(release, intervalDays * i));
+      lastDueDate = due;
+      const principalPortion = (i === count) ? principalRemaining : Math.min(principalRemaining, principalEachBase);
+      principalRemaining -= principalPortion;
+      baseRows.push({ key: 'row' + i, index: i, dueDate: due, principalPortion, interest: interestEach, paymentDue: principalPortion + interestEach });
+    }
+    return { baseRows, principal, count, intervalDays, lastDueDate, interestEach, principalEachBase, release };
+  }
+
+  function getAllRows(inputs, rState) {
+    const { baseRows, principalEachBase, intervalDays, lastDueDate, interestEach } = getBaseRows(inputs);
+    const allRows = baseRows.map(r => ({ ...r, isExt: false, originKey: r.key }));
+    let currentLastDate = lastDueDate;
+    const spawned = new Set();
+    let safety = 0;
+
+    while (safety < 1000) {
+      safety++;
+      let spawnedThisPass = false;
+      const snapshot = allRows.slice();
+      for (const row of snapshot) {
+        const status = rState[row.key + '_status'] || 'pending';
+        if (status !== 'overdue') continue;
+        if (spawned.has(row.key)) continue;
+        spawned.add(row.key);
+        const extDue = roundUpCutoff(addDays(currentLastDate, intervalDays));
+        const extIndex = allRows.length + 1;
+        allRows.push({
+          key: 'ext_row' + (allRows.length - baseRows.length),
+          index: extIndex, dueDate: extDue, principalPortion: principalEachBase,
+          interest: interestEach, paymentDue: principalEachBase + interestEach, isExt: true, originKey: row.key
+        });
+        currentLastDate = extDue;
+        spawnedThisPass = true;
+      }
+      if (!spawnedThisPass) break;
+    }
+    return { allRows, baseRows, principalEachBase, intervalDays, interestEach };
+  }
+
+  function collectAllDueEntries() {
+    const entries = [];
+    const now = new Date();
+    savedRecords.forEach(rec => {
+      const inputs = rec.inputs || {};
+      const rs = rec.recordState || {};
+      const { allRows } = getAllRows(inputs, rs);
+      allRows.forEach(row => {
+        let status = rs[row.key + '_status'] || 'pending';
+        if (status === 'pending' && row.dueDate < now && !sameDay(row.dueDate, now)) status = 'overdue';
+        if (rs[row.key + '_status'] === 'overdue') return;
+        const amountOverride = rs[row.key + '_amount'];
+        const paydate = rs[row.key + '_paydate'] || '';
+        let amount = row.paymentDue;
+        if (amountOverride !== undefined && amountOverride !== '') amount = Number(amountOverride);
+        entries.push({ recordId: rec.id, clientName: rec.name || 'Unnamed client', rowKey: row.key, dueDate: row.dueDate, amount: amount, status: status, isExt: !!row.isExt, paydate: paydate });
+      });
+    });
+    entries.sort((a,b) => a.dueDate - b.dueDate);
+    return entries;
+  }
+
+  function renderRecordsStrip() {
+    const strip = $('recordsStrip');
+    strip.innerHTML = '';
+    if (!savedRecords.length) {
+      strip.innerHTML = '<span class="fineprint" style="padding:8px 4px;">No saved records yet. Log in and click “Save Client Record” to add one.</span>';
+      return;
+    }
+    savedRecords.forEach(rec => {
+      const chip = document.createElement('div');
+      chip.className = 'record-chip' + (rec.id === currentRecordId ? ' active' : '');
+      chip.innerHTML = `<i class="fas fa-user"></i><span class="chip-name">${escapeHtml(rec.name || 'Unnamed client')}</span><span class="chip-delete" title="Delete record"><i class="fas fa-times-circle"></i></span>`;
+      chip.addEventListener('click', (e) => {
+        if (e.target.closest('.chip-delete')) {
+          e.stopPropagation();
+          if (confirm(`Delete record for “${rec.name || 'Unnamed client'}”? This cannot be undone.`)) {
+            deleteRecordFromSupabase(rec.id);
+          }
+        } else {
+          currentRecordId = rec.id;
+          recordState = rec.recordState ? { ...rec.recordState } : {};
+          setFormInputs(rec.inputs);
+          render();
+          renderRecordsStrip();
+        }
+      });
+      strip.appendChild(chip);
+    });
+  }
+
+  function getFormInputs() {
+    return {
+      client: $('client').value, bankType: $('bankType').value, bankName: $('bankName').value,
+      bankNumber: $('bankNumber').value, guarantor: $('guarantor').value, refdate: $('refdate').value,
+      amount: $('amount').value, term: $('term').value, frequency: $('frequency').value, rate: $('rate').value
+    };
+  }
+
+  function setFormInputs(inputs) {
+    ['client','bankType','bankName','bankNumber','guarantor','refdate','amount','term','frequency','rate']
+      .forEach(id => { const el = $(id); if (el && inputs[id] !== undefined) el.value = inputs[id]; });
+  }
+
+  function clearForm() {
+    ['client','bankType','bankName','bankNumber','guarantor'].forEach(id => $(id).value = '');
+    const today = new Date();
+    $('refdate').value = localIso(today);
+    $('amount').value = '10000'; $('term').value = '1'; $('frequency').value = 'biMonthly'; $('rate').value = '10';
+  }
+
+  function render() {
+    const inputs = getFormInputs();
+    const { allRows, baseRows, principalEachBase, intervalDays, interestEach } = getAllRows(inputs, recordState);
+
+    const principal = Math.round(Number(inputs.amount));
+    const termValue = inputs.term;
+    const is15 = termValue === '15days';
+    const months = is15 ? 0 : Math.max(1, Number(termValue) || 1);
+    const frequency = inputs.frequency;
+    const ratePct = Math.max(0, Number(inputs.rate) || 0);
+    const monthlyInterest = principal * ratePct / 100;
+    const count = is15 ? 1 : (frequency === 'biMonthly' ? months * 2 : months);
+    const totalInterest = interestEach * count;
+
+    $('principalOut').textContent = money(principal);
+    $('interestOut').textContent = money(totalInterest);
+    $('totalOut').textContent = money(principal + totalInterest);
+
+    const clientName = inputs.client.trim() || '—';
+    const guarantorName = inputs.guarantor.trim() || '—';
+    $('outClient').textContent = clientName;
+    $('outBankType').textContent = inputs.bankType || '—';
+    $('outBankName').textContent = inputs.bankName.trim() || '—';
+    $('outBankNumber').textContent = inputs.bankNumber.trim() || '—';
+    $('outGuarantor').textContent = guarantorName;
+    $('sigClient').textContent = clientName;
+    $('sigGuarantor').textContent = guarantorName;
+    
+    const releaseDateObj = inputs.refdate ? parseDate(inputs.refdate) : new Date();
+    $('releaseDate').textContent = fmtDate(releaseDateObj);
+
+    const tbody = $('scheduleRows');
+    tbody.replaceChildren();
+
+    allRows.forEach(row => {
+      const k = row.key;
+      const isExt = row.isExt;
+      const status = recordState[k + '_status'] || 'pending';
+
+      const tr = document.createElement('tr');
+      tr.dataset.key = k;
+      if (isExt) tr.className = 'extended-row';
+      if (status === 'paid') tr.classList.add('row-paid');
+      if (status === 'overdue') tr.classList.add('row-overdue');
+
+      const tdNum = document.createElement('td');
+      tdNum.style.width = '28px';
+      if (isExt) tdNum.innerHTML = `<span class="badge"><i class="fas fa-clock"></i>EXT</span><br><small>#${row.index}</small>`;
+      else tdNum.textContent = String(row.index);
+
+      const tdDate = document.createElement('td');
+      tdDate.textContent = fmtDate(row.dueDate);
+
+      let pAmount = row.principalPortion;
+      let iAmount = row.interest;
+      let dueAmount = row.paymentDue;
+
+      let displayPrincipal = money(pAmount);
+      let displayInterest = money(iAmount);
+      let displayDue = money(dueAmount);
+
+      if (status === 'overdue') {
+        displayPrincipal = '—';
+        const amtVal = recordState[k + '_amount'] !== undefined && recordState[k + '_amount'] !== ''
+          ? Number(recordState[k + '_amount']) : (Math.ceil(pAmount * 0.10) + iAmount);
+        displayInterest = moneyFull(amtVal);
+        displayDue = moneyFull(amtVal);
+      } else if (status === 'paid') {
+        const amtVal = recordState[k + '_amount'] !== undefined && recordState[k + '_amount'] !== ''
+          ? Number(recordState[k + '_amount']) : dueAmount;
+        displayDue = moneyFull(amtVal);
+      }
+
+      const tdP = document.createElement('td'); tdP.className = 'num'; tdP.textContent = displayPrincipal;
+      const tdI = document.createElement('td'); tdI.className = 'num'; tdI.textContent = displayInterest;
+      const tdD = document.createElement('td'); tdD.className = 'num'; tdD.textContent = displayDue;
+
+      const tdPayDate = document.createElement('td');
+      tdPayDate.className = 'col-separator';
+      const payDateIn = document.createElement('input');
+      payDateIn.type = 'date';
+      payDateIn.className = 'record-input no-print';
+      payDateIn.value = recordState[k + '_paydate'] || '';
+      payDateIn.addEventListener('change', () => {
+        recordState[k + '_paydate'] = payDateIn.value;
+        const m = tdPayDate.querySelector('.print-mirror');
+        if (m) m.textContent = payDateIn.value ? fmtDate(parseDate(payDateIn.value)) : '—';
+        renderSummaryTab();
+      });
+      const payDateMirror = document.createElement('span');
+      payDateMirror.className = 'print-mirror';
+      payDateMirror.textContent = recordState[k + '_paydate'] ? fmtDate(parseDate(recordState[k + '_paydate'])) : '—';
+      tdPayDate.appendChild(payDateIn);
+      tdPayDate.appendChild(payDateMirror);
+
+      const tdAmt = document.createElement('td');
+      tdAmt.className = 'num';
+      const amtIn = document.createElement('input');
+      amtIn.type = 'text';
+      amtIn.className = 'record-input amount no-print';
+      
+      let initialRawVal = '';
+      if (recordState[k + '_amount'] !== undefined) {
+        initialRawVal = recordState[k + '_amount'];
+      } else {
+        if (status === 'paid') initialRawVal = dueAmount;
+        else if (status === 'overdue') initialRawVal = Math.ceil(pAmount * 0.10) + iAmount;
+      }
+
+      function formatInputValue(val) {
+        if (val === '' || val === null || val === undefined) return '';
+        const num = Number(val);
+        if (isNaN(num)) return val;
+        return '₱' + num.toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      }
+      function unformatInputValue(str) {
+        if (!str) return '';
+        return str.replace(/[₱,\s]/g, '');
+      }
+
+      amtIn.value = formatInputValue(initialRawVal);
+      amtIn.addEventListener('focus', () => amtIn.value = unformatInputValue(amtIn.value));
+      amtIn.addEventListener('blur', () => amtIn.value = formatInputValue(unformatInputValue(amtIn.value)));
+      amtIn.addEventListener('input', () => {
+        const raw = unformatInputValue(amtIn.value);
+        recordState[k + '_amount'] = raw;
+        const m = tdAmt.querySelector('.print-mirror');
+        if (m) m.textContent = raw ? moneyFull(Number(raw)) : '—';
+        renderSummaryTab();
+      });
+
+      const amtMirror = document.createElement('span');
+      amtMirror.className = 'print-mirror';
+      amtMirror.textContent = initialRawVal !== '' ? moneyFull(Number(initialRawVal)) : '—';
+      tdAmt.appendChild(amtIn);
+      tdAmt.appendChild(amtMirror);
+
+      const tdStatus = document.createElement('td');
+      tdStatus.className = 'pay-status';
+      const sel = document.createElement('select');
+      sel.className = 'no-print';
+      [['pending','— Pending —'],['paid','Paid'],['overdue','Overdue Fee']].forEach(([v,t]) => {
+        const o = document.createElement('option'); o.value = v; o.textContent = t; sel.appendChild(o);
+      });
+      sel.value = status;
+      sel.classList.toggle('paid', status === 'paid');
+      sel.classList.toggle('overdue', status === 'overdue');
+      sel.addEventListener('change', () => {
+        recordState[k + '_status'] = sel.value;
+        delete recordState[k + '_amount'];
+        render();
+        renderSummaryTab();
+      });
+
+      const statusMirror = document.createElement('span');
+      statusMirror.className = 'print-mirror';
+      statusMirror.textContent = status === 'paid' ? 'Paid' : status === 'overdue' ? 'Overdue Fee' : '—';
+      tdStatus.appendChild(sel);
+      tdStatus.appendChild(statusMirror);
+
+      tr.append(tdNum, tdDate, tdP, tdI, tdD, tdPayDate, tdAmt, tdStatus);
+      tbody.appendChild(tr);
+    });
+
+    $('principalTotal').textContent = money(principal);
+    $('interestTotal').textContent = money(totalInterest);
+    $('paymentTotal').textContent = money(principal + totalInterest);
+
+    if (is15) {
+      $('calculationNote').textContent = `Term: 15 days · 1 payment. Interest is 50% of the monthly interest (${money(monthlyInterest)} ÷ 2 = ${money(interestEach)}), rounded up. Due date = release date + 15 days, adjusted to the next valid cutoff (5th, 10th, 15th, 20th, 25th, 30th, or last day of the month).`;
+    } else if (frequency === 'biMonthly') {
+      $('calculationNote').textContent = `Term: ${months} month(s) · Bi-Monthly schedule (${count} payments). Interest per payment = ${money(monthlyInterest)} ÷ 2 = ${money(interestEach)} (rounded up). Payment dates = release date + 15-day intervals, adjusted to valid cutoffs.`;
+    } else {
+      $('calculationNote').textContent = `Term: ${months} month(s) · Monthly schedule (${count} payments). Interest per payment = ${money(monthlyInterest)} (rounded up). Payment dates = release date + 30-day intervals, adjusted to valid cutoffs.`;
+    }
+    $('calculationNote').textContent += ' Principal is split as evenly as possible in whole pesos; the final payment adjusts to the remaining balance.';
+
+    $('lateNote').innerHTML = `<strong>Late / Unable-to-Pay Note:</strong> If the borrower cannot pay the scheduled payment, they must pay the applicable interest for that payment plus a late penalty equal to 10% of the unpaid principal portion. Selecting <em>Overdue Fee</em> generates an additional payment date at the end of the schedule (15 days after the last standard due date, adjusted to valid cutoff).`;
+  }
+
+  function renderSummaryTab() {
+    if (!currentUser) return; // Don't render if not logged in
+    const entries = collectAllDueEntries();
+    const now = new Date();
+    const curYear = now.getFullYear(), curMonth = now.getMonth();
+
+    $('kpiClients').textContent = String(savedRecords.length);
+
+    let dueThisMonth = 0, overdueUrgent = 0;
+    entries.forEach(e => {
+      const d = e.dueDate;
+      if (d.getFullYear() === curYear && d.getMonth() === curMonth && e.status !== 'paid') dueThisMonth += e.amount;
+      if (e.status === 'overdue') overdueUrgent++;
+    });
+    $('kpiDueMonth').textContent = money(dueThisMonth);
+    $('kpiOverdue').textContent = String(overdueUrgent);
+
+    renderMonthlySummary();
+    renderCalendar(entries);
+    renderUpcomingList(entries);
+  }
+
+  function renderMonthlySummary() {
+    const tbody = $('monthlySummaryRows');
+    tbody.innerHTML = '';
+    const monthData = {};
+
+    function getMonthKey(date) { return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}`; }
+    function ensureMonth(key) { if (!monthData[key]) monthData[key] = { released: 0, received: 0, principalRet: 0, profit: 0 }; return monthData[key]; }
+
+    savedRecords.forEach(rec => {
+      const inputs = rec.inputs || {};
+      const rs = rec.recordState || {};
+      const { allRows } = getAllRows(inputs, rs);
+      const principal = Math.round(Number(inputs.amount));
+
+      const releaseDate = inputs.refdate ? parseDate(inputs.refdate) : new Date();
+      ensureMonth(getMonthKey(releaseDate)).released += principal;
+
+      allRows.forEach(row => {
+        const status = rs[row.key + '_status'] || 'pending';
+        if (status === 'pending') return;
+        const payKey = getMonthKey(row.dueDate);
+        const bucket = ensureMonth(payKey);
+        const amtOverride = rs[row.key + '_amount'];
+        const hasOverride = amtOverride !== undefined && amtOverride !== '';
+
+        if (status === 'paid') {
+          const amountPaid = hasOverride ? Number(amtOverride) : row.paymentDue;
+          bucket.received += amountPaid;
+          bucket.principalRet += row.principalPortion;
+          bucket.profit += row.interest;
+        } else if (status === 'overdue') {
+          const overdueFee = hasOverride ? Number(amtOverride) : Math.ceil(row.principalPortion * 0.10) + row.interest;
+          bucket.received += overdueFee;
+          bucket.principalRet += 0;
+          bucket.profit += overdueFee;
+        }
+      });
+    });
+
+    const sortedKeys = Object.keys(monthData).sort().reverse();
+    if (sortedKeys.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding: 20px; color: var(--muted);">No financial data yet.</td></tr>';
+      return;
+    }
+
+    const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+    sortedKeys.forEach(key => {
+      const [year, month] = key.split('-');
+      const mName = `${monthNames[parseInt(month)-1]} ${year}`;
+      const data = monthData[key];
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td style="font-weight:600;">${mName}</td>
+        <td class="num">${money(data.released)}</td>
+        <td class="num" style="color:var(--ok); font-weight:600;">${money(data.received)}</td>
+        <td class="num">${money(data.principalRet)}</td>
+        <td class="num" style="color:var(--accent); font-weight:600;">${money(data.profit)}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+
+  function renderCalendar(entries) {
+    if (calYear === undefined || calMonth === undefined) {
+      const now = new Date(); calYear = now.getFullYear(); calMonth = now.getMonth();
+    }
+    const monthNames = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+    $('monthLabel').textContent = `${monthNames[calMonth]} ${calYear}`;
+
+    const grid = $('calGrid');
+    grid.innerHTML = '';
+    ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].forEach(h => {
+      const div = document.createElement('div'); div.className = 'cal-head'; div.textContent = h; grid.appendChild(div);
+    });
+
+    const first = new Date(calYear, calMonth, 1);
+    const startDay = first.getDay();
+    const daysInMonth = lastDayOfMonth(calYear, calMonth);
+    const prevMonthDays = lastDayOfMonth(calYear, calMonth - 1 < 0 ? 11 : calMonth - 1);
+    const totalCells = Math.ceil((startDay + daysInMonth) / 7) * 7;
+    const today = new Date();
+
+    for (let i = 0; i < totalCells; i++) {
+      let dayNum, cellMonth = calMonth, cellYear = calYear, otherMonth = false;
+      if (i < startDay) {
+        dayNum = prevMonthDays - startDay + i + 1;
+        cellMonth = calMonth - 1;
+        if (cellMonth < 0) { cellMonth = 11; cellYear--; }
+        otherMonth = true;
+      } else if (i >= startDay + daysInMonth) {
+        dayNum = i - (startDay + daysInMonth) + 1;
+        cellMonth = calMonth + 1;
+        if (cellMonth > 11) { cellMonth = 0; cellYear++; }
+        otherMonth = true;
+      } else { dayNum = i - startDay + 1; }
+
+      const cellDate = new Date(cellYear, cellMonth, dayNum);
+      const cell = document.createElement('div');
+      cell.className = 'cal-day';
+      if (otherMonth) cell.classList.add('other-month');
+      if (!otherMonth && sameDay(cellDate, today)) cell.classList.add('today');
+
+      const dayLabel = document.createElement('div');
+      dayLabel.className = 'day-num';
+      dayLabel.textContent = String(dayNum);
+      cell.appendChild(dayLabel);
+
+      entries.forEach(e => {
+        if (sameDay(e.dueDate, cellDate)) {
+          const entry = document.createElement('div');
+          entry.className = 'cal-entry';
+          if (e.status === 'paid') entry.classList.add('paid');
+          else if (e.status === 'overdue') entry.classList.add('overdue');
+          entry.innerHTML = `<span class="entry-name">${escapeHtml(e.clientName)}</span><span class="entry-amount">${money(e.amount)}</span>`;
+          entry.title = `${e.clientName} · ${fmtShort(e.dueDate)} · ${money(e.amount)} · ${e.status}`;
+          entry.addEventListener('click', (ev) => {
+            ev.stopPropagation(); 
+            switchTab('calculatorTab'); 
+            const rec = savedRecords.find(r => r.id === e.recordId);
+            if (rec) {
+              currentRecordId = rec.id;
+              recordState = rec.recordState ? { ...rec.recordState } : {};
+              setFormInputs(rec.inputs);
+              render();
+              renderRecordsStrip();
+            }
+          });
+          cell.appendChild(entry);
+        }
+      });
+      grid.appendChild(cell);
+    }
+  }
+
+  function renderUpcomingList(entries) {
+    const list = $('upcomingList');
+    list.innerHTML = '';
+    const now = new Date();
+    const upcoming = entries.filter(e => e.status !== 'paid').sort((a,b) => a.dueDate - b.dueDate).slice(0, 20);
+
+    if (!upcoming.length) {
+      list.innerHTML = '<div class="empty-state"><i class="fas fa-check-circle" style="color:var(--ok);"></i><p>All caught up! No pending due dates.</p></div>';
+      return;
+    }
+
+    upcoming.forEach(e => {
+      const item = document.createElement('div');
+      item.className = 'upcoming-item';
+      const daysDiff = Math.ceil((e.dueDate - now) / (1000*60*60*24));
+      let daysLabel = '', daysClass = '';
+      if (daysDiff < 0) { daysLabel = `${Math.abs(daysDiff)}d overdue`; daysClass = 'urgent'; }
+      else if (daysDiff === 0) { daysLabel = 'Today'; daysClass = 'urgent'; }
+      else if (daysDiff === 1) { daysLabel = 'Tomorrow'; }
+      else { daysLabel = `in ${daysDiff}d`; }
+
+      item.innerHTML = `
+        <span class="up-date">${fmtShort(e.dueDate)}</span>
+        <span class="up-name">${escapeHtml(e.clientName)}${e.isExt ? ' <span class="badge" style="font-size:9px;"><i class="fas fa-clock"></i>EXT</span>' : ''}</span>
+        <span class="up-amount">${money(e.amount)}</span>
+        <span class="up-status ${e.status}">${e.status}</span>
+        <span class="up-days ${daysClass}">${daysLabel}</span>
+      `;
+      item.addEventListener('click', () => { 
+        switchTab('calculatorTab'); 
+        const rec = savedRecords.find(r => r.id === e.recordId);
+        if (rec) {
+          currentRecordId = rec.id;
+          recordState = rec.recordState ? { ...rec.recordState } : {};
+          setFormInputs(rec.inputs);
+          render();
+          renderRecordsStrip();
+        }
+      });
+      list.appendChild(item);
+    });
+  }
+
+  function switchTab(tabId) {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tabId));
+    document.querySelectorAll('.tab-pane').forEach(p => p.classList.toggle('active', p.id === tabId));
+    if (tabId === 'summaryTab') renderSummaryTab();
+  }
+
+  function deleteCurrentRecord() {
+    if (!currentRecordId) { alert('No record is currently loaded.'); return; }
+    const rec = savedRecords.find(r => r.id === currentRecordId);
+    const name = rec ? (rec.name || 'Unnamed client') : 'this record';
+    if (!confirm(`Delete “${name}”? This cannot be undone.`)) return;
+    deleteRecordFromSupabase(currentRecordId);
+  }
+
+  function newRecord() {
+    currentRecordId = null;
+    recordState = {};
+    clearForm();
+    render();
+    renderRecordsStrip();
+  }
+
+  function bindEvents() {
+    ['client','bankType','bankName','bankNumber','guarantor','refdate','amount','term','frequency','rate']
+      .forEach(id => {
+        const el = $(id);
+        el.addEventListener('input', render);
+        el.addEventListener('change', render);
+      });
+
+    $('amount').addEventListener('change', () => {
+      let v = Math.round(Number($('amount').value));
+      if (!Number.isFinite(v) || v < 1) v = 1;
+      $('amount').value = String(v);
+      render();
+    });
+
+    $('printBtn').addEventListener('click', () => window.print());
+    $('saveRecordBtn').addEventListener('click', saveRecordToSupabase);
+    $('resetBtn').addEventListener('click', () => {
+      if (!confirm('Reset the current form? Unsaved changes will be lost.')) return;
+      if (currentRecordId) {
+        const rec = savedRecords.find(r => r.id === currentRecordId);
+        if (rec) { setFormInputs(rec.inputs); recordState = rec.recordState ? { ...rec.recordState } : {}; render(); return; }
+      }
+      clearForm(); recordState = {}; render();
+    });
+    $('deleteRecordBtn').addEventListener('click', deleteCurrentRecord);
+    $('newRecordBtn').addEventListener('click', newRecord);
+
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+    });
+
+    $('prevMonth').addEventListener('click', () => {
+      calMonth--;
+      if (calMonth < 0) { calMonth = 11; calYear--; }
+      renderSummaryTab();
+    });
+    $('nextMonth').addEventListener('click', () => {
+      calMonth++;
+      if (calMonth > 11) { calMonth = 0; calYear++; }
+      renderSummaryTab();
+    });
+    $('todayBtn').addEventListener('click', () => {
+      const now = new Date(); calYear = now.getFullYear(); calMonth = now.getMonth(); renderSummaryTab();
+    });
+  }
+
+  // INIT
+  window.addEventListener('DOMContentLoaded', () => {
+    const today = new Date();
+    $('refdate').value = localIso(today);
+    const now = new Date(); calYear = now.getFullYear(); calMonth = now.getMonth();
+
+    bindEvents();
+    render(); // renders the public calculator
+    checkAuth(); // checks login status and updates UI
+  });
+
+</script>
+</body>
+</html>
