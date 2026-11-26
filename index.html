@@ -17,7 +17,7 @@
       --warn-bg: #fff8e6; --warn-border: #e6c86a; --radius: 12px;
       --shadow: 0 8px 20px rgba(0,0,0,0.02), 0 2px 6px rgba(0,20,50,0.03);
     }
-    body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, Arial, sans-serif; background: #eef1f6; color: var(--ink); padding: 24px; line-height: 1.45; }
+    body { font-family: 'Inter', sans-serif; background: #eef1f6; color: var(--ink); padding: 24px; line-height: 1.45; }
     .app { max-width: 1200px; margin: 0 auto; }
     
     .header { margin-bottom: 20px; display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 16px; }
@@ -27,7 +27,7 @@
     .header-actions { display: flex; gap: 10px; align-items: center; }
     .header-actions button { padding: 10px 18px; font-size: 13px; }
 
-    .tabs { display: flex; gap: 0; margin-bottom: 22px; border-bottom: 2px solid var(--line); }
+    .tabs { display: flex; gap: 0; margin-bottom: 22px; border-bottom: 2px solid var(--line); flex-wrap: wrap; }
     .tab-btn { padding: 12px 24px; font-size: 14px; font-weight: 600; font-family: inherit; color: var(--muted); background: none; border: none; border-bottom: 2px solid transparent; margin-bottom: -2px; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: 0.15s; }
     .tab-btn:hover { color: var(--accent); }
     .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
@@ -36,25 +36,27 @@
     .tab-pane.active { display: block; }
 
     .panel { background: white; border: 1px solid var(--line); border-radius: var(--radius); padding: 20px 22px; margin-bottom: 18px; box-shadow: var(--shadow); }
-    .panel h2 { font-size: 17px; font-weight: 600; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; color: var(--ink); }
+    .panel h2 { font-size: 17px; font-weight: 600; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; color: var(--ink); border-bottom: 1px solid var(--line); padding-bottom: 8px; }
     .panel h2 i { color: var(--accent); width: 20px; font-size: 16px; }
 
-    .records-strip { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 18px; }
-    .record-chip { background: white; border: 1px solid var(--line); border-radius: 30px; padding: 8px 16px 8px 12px; display: flex; align-items: center; gap: 10px; font-size: 13px; font-weight: 500; cursor: pointer; transition: 0.15s; box-shadow: var(--shadow); }
-    .record-chip:hover { border-color: var(--accent); background: var(--accent-light); }
-    .record-chip.active { border-color: var(--accent); background: var(--accent-light); box-shadow: 0 0 0 2px rgba(30,79,145,0.15); }
-    .record-chip .chip-name { max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .record-chip .chip-delete { color: var(--muted); font-size: 14px; margin-left: 4px; transition: 0.15s; }
-    .record-chip .chip-delete:hover { color: var(--danger); }
+    /* UPDATED RECORDS GRID FOR CLIENTS TAB */
+    .records-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 12px; margin-bottom: 18px; }
+    .record-card { background: white; border: 1px solid var(--line); border-radius: 10px; padding: 16px; display: flex; justify-content: space-between; align-items: center; font-size: 14px; font-weight: 500; cursor: pointer; transition: 0.15s; box-shadow: var(--shadow); }
+    .record-card:hover { border-color: var(--accent); background: var(--accent-light); }
+    .record-card.active { border-color: var(--accent); background: var(--accent-light); box-shadow: 0 0 0 2px rgba(30,79,145,0.15); }
+    .record-card .card-info { display: flex; flex-direction: column; overflow: hidden; }
+    .record-card .card-name { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .record-card .card-amount { font-size: 12px; color: var(--muted); margin-top: 4px; }
+    .record-card .card-delete { color: var(--muted); font-size: 16px; transition: 0.15s; padding: 8px; margin-right: -8px; }
+    .record-card .card-delete:hover { color: var(--danger); }
 
     .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px 20px; }
-    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px 20px; }
     label { display: block; font-weight: 600; font-size: 13px; margin-bottom: 5px; color: #2a3348; letter-spacing: 0.01em; }
     input, select { width: 100%; padding: 10px 12px; border: 1px solid #cbd2df; border-radius: 8px; font-family: inherit; font-size: 14px; background: white; color: var(--ink); transition: 0.15s; }
     input:focus, select:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(30,79,145,0.08); }
     .hint { font-size: 12px; color: var(--muted); margin-top: 6px; line-height: 1.4; }
 
-    .summary-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
+    .summary-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px; }
     .metric { background: var(--soft); border-radius: 10px; padding: 14px 16px; }
     .metric .label { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.03em; color: var(--muted); }
     .metric .value { font-size: 23px; font-weight: 700; margin-top: 6px; letter-spacing: -0.02em; overflow-wrap: anywhere; }
@@ -76,14 +78,17 @@
 
     tr.row-paid td { background: #e8f5e9 !important; }
     tr.row-overdue td { background: #fdecea !important; }
-
     .extended-row td { background: var(--warn-bg); border-bottom: 2px solid var(--warn-border); }
     .badge { display: inline-block; font-size: 10px; padding: 2px 7px; border-radius: 20px; background: #f8d77c; color: #6e4a00; font-weight: 700; letter-spacing: 0.02em; }
     .badge i { margin-right: 3px; }
 
     .print-mirror { display: none; }
     .fineprint { font-size: 12px; color: var(--muted); margin-top: 10px; line-height: 1.5; }
-    .late-note { background: #fff5f5; border-left: 4px solid var(--danger); padding: 12px 16px; border-radius: 8px; font-size: 13px; margin-top: 16px; }
+    
+    .policy-note { background: #f8f9fa; border-left: 4px solid var(--accent); padding: 12px 16px; border-radius: 8px; font-size: 13px; margin-top: 16px; color: #333; }
+    .policy-note p { margin-bottom: 8px; }
+    .policy-note p:last-child { margin-bottom: 0; }
+    .policy-note strong { color: var(--ink); }
 
     .signatures { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-top: 36px; }
     .sig { border-top: 1px solid #333; padding-top: 8px; font-size: 12px; }
@@ -103,7 +108,6 @@
     .empty-state { text-align: center; padding: 28px 20px; color: var(--muted); }
     .empty-state i { font-size: 36px; color: var(--line); margin-bottom: 12px; }
 
-    /* MODAL */
     .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 10000; }
     .modal-content { background: white; padding: 30px; border-radius: var(--radius); width: 100%; max-width: 400px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
     .modal-content h2 { margin-bottom: 20px; font-size: 20px; }
@@ -112,17 +116,10 @@
     .modal-content button { width: 100%; justify-content: center; }
     .auth-error { color: var(--danger); font-size: 13px; margin-bottom: 10px; display: none; }
 
-    /* CALENDAR */
     .cal-controls { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 18px; }
     .cal-controls .month-nav { display: flex; align-items: center; gap: 10px; }
     .cal-controls .month-nav button { padding: 8px 14px; font-size: 13px; border-radius: 8px; }
     .cal-controls .month-label { font-size: 18px; font-weight: 700; min-width: 180px; text-align: center; letter-spacing: -0.02em; }
-    .cal-legend { display: flex; gap: 16px; flex-wrap: wrap; font-size: 12px; color: var(--muted); align-items: center; }
-    .cal-legend span { display: flex; align-items: center; gap: 6px; }
-    .cal-legend .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
-    .dot-pending { background: #e6a817; }
-    .dot-paid { background: var(--ok); }
-    .dot-overdue { background: var(--danger); }
     .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin-bottom: 22px; }
     .cal-head { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); text-align: center; padding: 8px 0; }
     .cal-day { min-height: 100px; border: 1px solid var(--line); border-radius: 8px; padding: 6px; background: white; display: flex; flex-direction: column; gap: 4px; transition: 0.12s; }
@@ -151,9 +148,12 @@
     .upcoming-item .up-days { font-size: 11px; color: var(--muted); min-width: 70px; text-align: right; }
     .upcoming-item .up-days.urgent { color: var(--danger); font-weight: 700; }
 
+    @media (max-width: 900px) {
+      .summary-grid { grid-template-columns: repeat(2, 1fr); }
+    }
     @media (max-width: 720px) {
       body { padding: 14px; }
-      .grid-2, .grid-3, .summary-grid, .signatures { grid-template-columns: 1fr; gap: 14px; }
+      .grid-2, .summary-grid, .signatures { grid-template-columns: 1fr; gap: 14px; }
       .header h1 { font-size: 21px; }
       .panel { padding: 16px; }
       .actions button { flex: 1 1 auto; justify-content: center; }
@@ -167,7 +167,7 @@
     @media print {
       body { background: white; padding: 0; font-size: 11px; }
       .app { max-width: none; }
-      .no-print, .actions, .hint, .sub, .records-strip, .header-actions, .tabs { display: none !important; }
+      .no-print, .actions, .hint, .sub, .records-grid, .header-actions, .tabs { display: none !important; }
       .tab-pane { display: block !important; }
       .panel { border: 0; border-radius: 0; padding: 6px 0; margin: 0; box-shadow: none; }
       .header { text-align: center; margin-bottom: 8px; }
@@ -183,33 +183,47 @@
       .signatures { margin-top: 36px; }
       .col-separator { border-left: 1px solid #666; }
       .table-container { border: 1px solid #ccc; }
-      .late-note { border-left-color: #b3261e; }
+      .policy-note { border-left-color: #333; }
       @page { size: A4 landscape; margin: 10mm; }
     }
   </style>
 </head>
 <body>
-<div class="app">
+
+<!-- ========================================== -->
+<!-- ADMIN MODE (HIDDEN BY DEFAULT)             -->
+<!-- ========================================== -->
+<div class="app" id="adminApp" style="display:none;">
   <div class="header">
     <div>
-      <h1><i class="fas fa-calculator"></i> MBDLCT · Loan Manager</h1>
-      <p class="sub">Create, track, and print client loan schedules.</p>
+      <h1><i class="fas fa-calculator"></i> MBDLCT · Admin Manager</h1>
+      <p class="sub">Full control panel. You are currently logged in.</p>
     </div>
     <div class="header-actions no-print">
-      <button class="secondary" id="loginBtn"><i class="fas fa-sign-in-alt"></i> Login to Save</button>
-      <button class="primary" id="newRecordBtn"><i class="fas fa-plus"></i> New Client</button>
+      <button class="secondary" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</button>
     </div>
   </div>
 
   <div class="tabs no-print">
+    <button class="tab-btn" data-tab="clientsTab"><i class="fas fa-users"></i> My Clients</button>
     <button class="tab-btn active" data-tab="calculatorTab"><i class="fas fa-calculator"></i> Calculator</button>
     <button class="tab-btn" data-tab="summaryTab"><i class="fas fa-calendar-alt"></i> Summary &amp; Calendar</button>
   </div>
 
+  <!-- CLIENTS TAB -->
+  <div class="tab-pane" id="clientsTab">
+    <div class="actions no-print" style="margin-top: 0; margin-bottom: 20px;">
+      <button class="primary" id="newRecordBtn"><i class="fas fa-plus"></i> Create New Client</button>
+    </div>
+    <section class="panel no-print">
+      <h2><i class="fas fa-users"></i> Saved Clients</h2>
+      <div class="records-grid" id="recordsGrid"></div>
+      <p class="fineprint" style="text-align: center; padding: 10px;">Click on a client card to load their details into the Calculator tab.</p>
+    </section>
+  </div>
+
   <!-- CALCULATOR TAB -->
   <div class="tab-pane active" id="calculatorTab">
-    <div class="records-strip no-print" id="recordsStrip"></div>
-
     <section class="panel no-print">
       <h2><i class="fas fa-user-circle"></i> 1. Client Information</h2>
       <div class="grid-2">
@@ -357,7 +371,11 @@
       </div>
 
       <p class="fineprint" id="calculationNote"></p>
-      <p class="fineprint late-note" id="lateNote"></p>
+      
+      <div class="policy-note">
+        <p><strong>A.</strong> Overdue Fee = 10% of the principal amount + interest. The total amount must be paid; upon paying the overdue fee, your next payment cutoff will extend.</p>
+        <p><strong>B.</strong> No Payment = Failure to pay the overdue fee means a delinquent account. You will not be eligible to apply for future loans, and this will be treated as a missed payment and will incur a higher fee.</p>
+      </div>
 
       <div class="signatures">
         <div>
@@ -374,81 +392,152 @@
 
     <div class="actions no-print">
       <button class="primary" id="printBtn"><i class="fas fa-print"></i> Print / Save as PDF</button>
-      <button class="save-btn" id="saveRecordBtn" disabled><i class="fas fa-save"></i> Save Client Record</button>
+      <button class="save-btn" id="saveRecordBtn"><i class="fas fa-save"></i> Save Client Record</button>
       <button class="secondary" id="resetBtn"><i class="fas fa-undo-alt"></i> Reset Form</button>
       <button class="secondary" id="deleteRecordBtn"><i class="fas fa-trash-alt"></i> Delete This Record</button>
     </div>
-    <p class="fineprint no-print" style="margin-top:4px;">Public users can calculate and print. Log in to save records and see your calendar.</p>
   </div>
 
   <!-- SUMMARY TAB -->
   <div class="tab-pane" id="summaryTab">
-    
-    <!-- Auth Wall inside the tab -->
-    <div id="authWall" style="display:none; text-align:center; padding: 40px 20px; background: white; border-radius: var(--radius); border: 1px solid var(--line); box-shadow: var(--shadow);">
-      <i class="fas fa-lock" style="font-size: 40px; color: var(--muted); margin-bottom: 15px;"></i>
-      <h2>Log in to view your records</h2>
-      <p style="color: var(--muted); margin-bottom: 20px; font-size: 14px;">Your data is private and synced to your account.</p>
-      <button class="primary" onclick="document.getElementById('authModal').style.display='flex'">Log In Now</button>
-    </div>
-
-    <div id="summaryContent" style="display:none;">
-      <section class="panel">
-        <h2><i class="fas fa-chart-line"></i> Monthly Financial Summary</h2>
-        <div class="table-container">
-          <table>
-            <thead>
-              <tr>
-                <th>Month / Year</th>
-                <th class="num">Money Released (Principal)</th>
-                <th class="num">Total Money Received</th>
-                <th class="num">Principal Returned</th>
-                <th class="num">Interest / Profit Earned</th>
-              </tr>
-            </thead>
-            <tbody id="monthlySummaryRows"></tbody>
-          </table>
-        </div>
-        <p class="fineprint">This summary tracks all saved records. "Money Released" is based on the release date. "Money Received" and "Profit" are based on the schedule's Payment Date (Due Date).</p>
-      </section>
-
-      <div class="summary-grid" style="margin-bottom:20px;">
-        <div class="metric"><div class="label">Saved clients</div><div class="value" id="kpiClients">0</div></div>
-        <div class="metric"><div class="label">Due this month</div><div class="value" id="kpiDueMonth">₱0</div></div>
-        <div class="metric"><div class="label">Overdue / urgent</div><div class="value" id="kpiOverdue">0</div></div>
+    <section class="panel">
+      <h2><i class="fas fa-chart-line"></i> Monthly Financial Summary</h2>
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Month / Year</th>
+              <th class="num">Money Released (Principal)</th>
+              <th class="num">Total Money Received</th>
+              <th class="num">Principal Returned</th>
+              <th class="num">Interest / Profit Earned</th>
+            </tr>
+          </thead>
+          <tbody id="monthlySummaryRows"></tbody>
+        </table>
       </div>
+    </section>
 
-      <section class="panel">
-        <div class="cal-controls">
-          <div class="month-nav">
-            <button class="secondary" id="prevMonth"><i class="fas fa-chevron-left"></i></button>
-            <div class="month-label" id="monthLabel">—</div>
-            <button class="secondary" id="nextMonth"><i class="fas fa-chevron-right"></i></button>
-            <button class="secondary" id="todayBtn" style="margin-left:8px;"><i class="fas fa-calendar-day"></i> Today</button>
-          </div>
-          <div class="cal-legend">
-            <span><span class="dot dot-pending"></span> Pending</span>
-            <span><span class="dot dot-paid"></span> Paid</span>
-            <span><span class="dot dot-overdue"></span> Overdue</span>
-          </div>
-        </div>
-        <div class="cal-grid" id="calGrid"></div>
-      </section>
-
-      <section class="panel">
-        <h2><i class="fas fa-list-ul"></i> Upcoming due dates</h2>
-        <div class="upcoming-list" id="upcomingList">
-          <div class="empty-state"><i class="fas fa-inbox"></i><p>No saved records yet. Save a client to see their due dates here.</p></div>
-        </div>
-      </section>
+    <div class="summary-grid" style="margin-bottom:20px;">
+      <div class="metric"><div class="label">Saved clients</div><div class="value" id="kpiClients">0</div></div>
+      <div class="metric"><div class="label">Fully Paid Clients</div><div class="value" id="kpiFullyPaid" style="color:var(--ok);">0</div></div>
+      <div class="metric"><div class="label">Due this month</div><div class="value" id="kpiDueMonth">₱0</div></div>
+      <div class="metric"><div class="label">Total Income (%)</div><div class="value" id="kpiMargin" style="color:var(--accent);">0%</div></div>
     </div>
+
+    <section class="panel">
+      <div class="cal-controls">
+        <div class="month-nav">
+          <button class="secondary" id="prevMonth"><i class="fas fa-chevron-left"></i></button>
+          <div class="month-label" id="monthLabel">—</div>
+          <button class="secondary" id="nextMonth"><i class="fas fa-chevron-right"></i></button>
+          <button class="secondary" id="todayBtn" style="margin-left:8px;"><i class="fas fa-calendar-day"></i> Today</button>
+        </div>
+      </div>
+      <div class="cal-grid" id="calGrid"></div>
+    </section>
+
+    <section class="panel">
+      <h2><i class="fas fa-list-ul"></i> Upcoming due dates</h2>
+      <div class="upcoming-list" id="upcomingList"></div>
+    </section>
   </div>
 </div>
+
+
+<!-- ========================================== -->
+<!-- PUBLIC MODE (VISIBLE BY DEFAULT)           -->
+<!-- ========================================== -->
+<div class="app" id="publicApp">
+  <div class="header" style="justify-content: center; text-align: center;">
+    <div>
+      <h1><i class="fas fa-calculator"></i> Public Loan Calculator</h1>
+      <p class="sub">Estimate your loan payments easily.</p>
+    </div>
+  </div>
+
+  <section class="panel no-print">
+    <h2><i class="fas fa-sliders-h"></i> Loan Details</h2>
+    <div class="grid-2">
+      <div>
+        <label for="pub_amount">Loan Amount (₱)</label>
+        <input id="pub_amount" type="number" min="1" step="1" value="10000">
+      </div>
+      <div>
+        <label for="pub_term">Loan Term (Months)</label>
+        <select id="pub_term">
+          <option value="1">1 Month</option>
+          <option value="2">2 Months</option>
+          <option value="3">3 Months</option>
+          <option value="4">4 Months</option>
+          <option value="5">5 Months</option>
+          <option value="6">6 Months</option>
+          <option value="7">7 Months</option>
+          <option value="8">8 Months</option>
+          <option value="9">9 Months</option>
+          <option value="10">10 Months</option>
+          <option value="11">11 Months</option>
+          <option value="12">12 Months</option>
+        </select>
+      </div>
+      <div>
+        <label for="pub_frequency">Payment Frequency</label>
+        <select id="pub_frequency">
+          <option value="biMonthly">Bi-Monthly (10% Interest)</option>
+          <option value="monthly">Monthly (12% Interest)</option>
+        </select>
+      </div>
+      <div>
+        <label for="pub_refdate">Desired Release Date</label>
+        <input id="pub_refdate" type="date">
+      </div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2><i class="fas fa-table"></i> Payment Schedule</h2>
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th style="width:40px;">#</th>
+            <th>Payment Date</th>
+            <th class="num">Principal</th>
+            <th class="num">Interest</th>
+            <th class="num">Payment Due</th>
+          </tr>
+        </thead>
+        <tbody id="pub_scheduleRows"></tbody>
+        <tfoot>
+          <tr>
+            <th colspan="2">TOTAL</th>
+            <th class="num" id="pub_principalTotal">—</th>
+            <th class="num" id="pub_interestTotal">—</th>
+            <th class="num" id="pub_paymentTotal">—</th>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+    
+    <div class="policy-note">
+        <p><strong>A.</strong> Overdue Fee = 10% of the principal amount + interest. The total amount must be paid; upon paying the overdue fee, your next payment cutoff will extend.</p>
+        <p><strong>B.</strong> No Payment = Failure to pay the overdue fee means a delinquent account. You will not be eligible to apply for future loans, and this will be treated as a missed payment and will incur a higher fee.</p>
+    </div>
+
+    <div class="actions no-print" style="justify-content: center;">
+      <button class="primary" onclick="window.print()"><i class="fas fa-print"></i> Print / Save as PDF</button>
+    </div>
+    <div style="text-align: center; margin-top: 30px;">
+       <button class="secondary" id="openLoginBtn" style="font-size: 12px; padding: 8px 16px;"><i class="fas fa-lock"></i> Admin Login</button>
+    </div>
+  </section>
+</div>
+
 
 <!-- LOGIN MODAL -->
 <div class="modal-overlay" id="authModal">
   <div class="modal-content">
-    <h2><i class="fas fa-lock" style="color:var(--accent);"></i> Secure Login</h2>
+    <h2><i class="fas fa-lock" style="color:var(--accent);"></i> Admin Login</h2>
     <div id="authError" class="auth-error"></div>
     <input type="email" id="authEmail" placeholder="Email address" required>
     <input type="password" id="authPassword" placeholder="Password" required>
@@ -461,9 +550,6 @@
 </div>
 
 <script>
-  // ==========================================
-  // SUPABASE CONFIGURATION
-  // ==========================================
   const SUPABASE_URL = 'https://uzdrndauvmoggiahsqmb.supabase.co';
   const SUPABASE_KEY = 'sb_publishable__6PSS_vkiWPqx_ViJF253w_2vmxAQWg';
   const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -484,6 +570,7 @@
   const fmtShort = d => d.toLocaleDateString('en-PH', { month: 'short', day: 'numeric', year: 'numeric' });
   const localIso = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
   const lastDayOfMonth = (y, m) => new Date(y, m+1, 0).getDate();
+  const sameDay = (a,b) => a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
 
   function roundUpCutoff(target) {
     let y = target.getFullYear(), m = target.getMonth();
@@ -511,43 +598,83 @@
     });
   }
 
-  function sameDay(a,b) { return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate(); }
+  function renderPublic() {
+    let principal = Math.round(Number($('pub_amount').value)) || 1;
+    const months = Number($('pub_term').value);
+    const frequency = $('pub_frequency').value;
+    const releaseDateStr = $('pub_refdate').value;
+    
+    let ratePct = (frequency === 'biMonthly') ? 10 : 12;
+    
+    let count, intervalDays;
+    if (frequency === 'biMonthly') {
+      count = months * 2;
+      intervalDays = 15;
+    } else {
+      count = months;
+      intervalDays = 30;
+    }
 
-  // ==========================================
-  // AUTH LOGIC
-  // ==========================================
+    const monthlyInterest = principal * ratePct / 100;
+    const interestEach = frequency === 'biMonthly' ? Math.ceil(monthlyInterest / 2) : Math.ceil(monthlyInterest);
+    const principalEachBase = Math.ceil(principal / count);
+    const release = releaseDateStr ? parseDate(releaseDateStr) : new Date();
+
+    const tbody = $('pub_scheduleRows');
+    tbody.innerHTML = '';
+    
+    let principalRemaining = principal;
+    let totalInterest = 0;
+
+    for (let i = 1; i <= count; i++) {
+      let due = roundUpCutoff(addDays(release, intervalDays * i));
+      const principalPortion = (i === count) ? principalRemaining : Math.min(principalRemaining, principalEachBase);
+      principalRemaining -= principalPortion;
+      const paymentDue = principalPortion + interestEach;
+      totalInterest += interestEach;
+
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${i}</td>
+        <td>${fmtDate(due)}</td>
+        <td class="num">${money(principalPortion)}</td>
+        <td class="num">${money(interestEach)}</td>
+        <td class="num" style="font-weight:600;">${money(paymentDue)}</td>
+      `;
+      tbody.appendChild(tr);
+    }
+
+    $('pub_principalTotal').textContent = money(principal);
+    $('pub_interestTotal').textContent = money(totalInterest);
+    $('pub_paymentTotal').textContent = money(principal + totalInterest);
+  }
+
   async function checkAuth() {
     const { data: { session } } = await sb.auth.getSession();
     currentUser = session ? session.user : null;
     updateUIForAuth();
     if (currentUser) {
       await loadRecordsFromSupabase();
-    } else {
-      savedRecords = [];
-      renderRecordsStrip();
     }
   }
 
   function updateUIForAuth() {
-    const loginBtn = $('loginBtn');
-    const saveBtn = $('saveRecordBtn');
-    const authWall = $('authWall');
-    const summaryContent = $('summaryContent');
+    const publicApp = $('publicApp');
+    const adminApp = $('adminApp');
 
     if (currentUser) {
-      loginBtn.innerHTML = '<i class="fas fa-sign-out-alt"></i> Logout';
-      loginBtn.onclick = () => sb.auth.signOut().then(() => location.reload());
-      saveBtn.disabled = false;
-      authWall.style.display = 'none';
-      summaryContent.style.display = 'block';
+      publicApp.style.display = 'none';
+      adminApp.style.display = 'block';
+      $('authModal').style.display = 'none';
     } else {
-      loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Login to Save';
-      loginBtn.onclick = () => $('authModal').style.display = 'flex';
-      saveBtn.disabled = true;
-      authWall.style.display = 'block';
-      summaryContent.style.display = 'none';
+      publicApp.style.display = 'block';
+      adminApp.style.display = 'none';
     }
   }
+
+  $('openLoginBtn').onclick = () => $('authModal').style.display = 'flex';
+  $('closeAuthBtn').onclick = () => $('authModal').style.display = 'none';
+  $('logoutBtn').onclick = () => sb.auth.signOut().then(() => location.reload());
 
   $('loginSubmitBtn').onclick = async () => {
     const email = $('authEmail').value;
@@ -557,7 +684,6 @@
       $('authError').textContent = error.message;
       $('authError').style.display = 'block';
     } else {
-      $('authModal').style.display = 'none';
       $('authError').style.display = 'none';
       checkAuth();
     }
@@ -576,12 +702,6 @@
     }
   };
 
-  $('closeAuthBtn').onclick = () => $('authModal').style.display = 'none';
-
-
-  // ==========================================
-  // DATABASE LOGIC
-  // ==========================================
   async function loadRecordsFromSupabase() {
     if (!currentUser) return;
     const { data, error } = await sb.from('loans').select('*').order('updated_at', { ascending: false });
@@ -594,8 +714,8 @@
       recordState: row.record_data.recordState
     }));
     
-    renderRecordsStrip();
-    render();
+    renderRecordsGrid();
+    renderAdmin();
     renderSummaryTab();
   }
 
@@ -607,13 +727,11 @@
     const payload = { name, inputs, recordState: { ...recordState } };
 
     if (currentRecordId) {
-      // Update existing
       const { error } = await sb.from('loans')
         .update({ client_name: name, record_data: payload, updated_at: new Date() })
         .eq('id', currentRecordId);
       if (error) alert(error.message);
     } else {
-      // Insert new
       const { data, error } = await sb.from('loans')
         .insert({ user_id: currentUser.id, client_name: name, record_data: payload })
         .select();
@@ -640,10 +758,6 @@
     }
   }
 
-
-  // ==========================================
-  // CALCULATOR LOGIC (UNCHANGED)
-  // ==========================================
   function getBaseRows(inputs) {
     let principal = Math.round(Number(inputs.amount));
     if (!Number.isFinite(principal) || principal < 1) principal = 1;
@@ -736,19 +850,29 @@
     return entries;
   }
 
-  function renderRecordsStrip() {
-    const strip = $('recordsStrip');
-    strip.innerHTML = '';
+  // RENDERS THE NEW CLIENT CARDS
+  function renderRecordsGrid() {
+    const grid = $('recordsGrid');
+    grid.innerHTML = '';
     if (!savedRecords.length) {
-      strip.innerHTML = '<span class="fineprint" style="padding:8px 4px;">No saved records yet. Log in and click “Save Client Record” to add one.</span>';
+      grid.innerHTML = '<div class="empty-state" style="grid-column: 1/-1;"><i class="fas fa-users"></i><p>No saved clients yet. Click "Create New Client" to add one.</p></div>';
       return;
     }
     savedRecords.forEach(rec => {
-      const chip = document.createElement('div');
-      chip.className = 'record-chip' + (rec.id === currentRecordId ? ' active' : '');
-      chip.innerHTML = `<i class="fas fa-user"></i><span class="chip-name">${escapeHtml(rec.name || 'Unnamed client')}</span><span class="chip-delete" title="Delete record"><i class="fas fa-times-circle"></i></span>`;
-      chip.addEventListener('click', (e) => {
-        if (e.target.closest('.chip-delete')) {
+      const card = document.createElement('div');
+      card.className = 'record-card' + (rec.id === currentRecordId ? ' active' : '');
+      
+      const amount = rec.inputs.amount ? money(rec.inputs.amount) : '';
+      
+      card.innerHTML = `
+        <div class="card-info">
+          <span class="card-name">${escapeHtml(rec.name || 'Unnamed client')}</span>
+          <span class="card-amount">${amount}</span>
+        </div>
+        <span class="card-delete" title="Delete record"><i class="fas fa-trash-alt"></i></span>
+      `;
+      card.addEventListener('click', (e) => {
+        if (e.target.closest('.card-delete')) {
           e.stopPropagation();
           if (confirm(`Delete record for “${rec.name || 'Unnamed client'}”? This cannot be undone.`)) {
             deleteRecordFromSupabase(rec.id);
@@ -757,11 +881,12 @@
           currentRecordId = rec.id;
           recordState = rec.recordState ? { ...rec.recordState } : {};
           setFormInputs(rec.inputs);
-          render();
-          renderRecordsStrip();
+          renderAdmin();
+          renderRecordsGrid();
+          switchTab('calculatorTab'); // AUTO-SWITCH TO CALCULATOR
         }
       });
-      strip.appendChild(chip);
+      grid.appendChild(card);
     });
   }
 
@@ -785,7 +910,7 @@
     $('amount').value = '10000'; $('term').value = '1'; $('frequency').value = 'biMonthly'; $('rate').value = '10';
   }
 
-  function render() {
+  function renderAdmin() {
     const inputs = getFormInputs();
     const { allRows, baseRows, principalEachBase, intervalDays, interestEach } = getAllRows(inputs, recordState);
 
@@ -935,7 +1060,7 @@
       sel.addEventListener('change', () => {
         recordState[k + '_status'] = sel.value;
         delete recordState[k + '_amount'];
-        render();
+        renderAdmin();
         renderSummaryTab();
       });
 
@@ -954,24 +1079,55 @@
     $('paymentTotal').textContent = money(principal + totalInterest);
 
     if (is15) {
-      $('calculationNote').textContent = `Term: 15 days · 1 payment. Interest is 50% of the monthly interest (${money(monthlyInterest)} ÷ 2 = ${money(interestEach)}), rounded up. Due date = release date + 15 days, adjusted to the next valid cutoff (5th, 10th, 15th, 20th, 25th, 30th, or last day of the month).`;
+      $('calculationNote').textContent = `Term: 15 days · 1 payment.`;
     } else if (frequency === 'biMonthly') {
-      $('calculationNote').textContent = `Term: ${months} month(s) · Bi-Monthly schedule (${count} payments). Interest per payment = ${money(monthlyInterest)} ÷ 2 = ${money(interestEach)} (rounded up). Payment dates = release date + 15-day intervals, adjusted to valid cutoffs.`;
+      $('calculationNote').textContent = `Term: ${months} month(s) · Bi-Monthly schedule (${count} payments).`;
     } else {
-      $('calculationNote').textContent = `Term: ${months} month(s) · Monthly schedule (${count} payments). Interest per payment = ${money(monthlyInterest)} (rounded up). Payment dates = release date + 30-day intervals, adjusted to valid cutoffs.`;
+      $('calculationNote').textContent = `Term: ${months} month(s) · Monthly schedule (${count} payments).`;
     }
-    $('calculationNote').textContent += ' Principal is split as evenly as possible in whole pesos; the final payment adjusts to the remaining balance.';
-
-    $('lateNote').innerHTML = `<strong>Late / Unable-to-Pay Note:</strong> If the borrower cannot pay the scheduled payment, they must pay the applicable interest for that payment plus a late penalty equal to 10% of the unpaid principal portion. Selecting <em>Overdue Fee</em> generates an additional payment date at the end of the schedule (15 days after the last standard due date, adjusted to valid cutoff).`;
   }
 
   function renderSummaryTab() {
-    if (!currentUser) return; // Don't render if not logged in
+    if (!currentUser) return;
     const entries = collectAllDueEntries();
     const now = new Date();
     const curYear = now.getFullYear(), curMonth = now.getMonth();
 
+    let fullyPaidCount = 0;
+    let totalProfit = 0;
+    let totalReleased = 0;
+
+    savedRecords.forEach(rec => {
+      const inputs = rec.inputs || {};
+      const rs = rec.recordState || {};
+      const { allRows } = getAllRows(inputs, rs);
+      
+      let allPaid = true;
+      let recProfit = 0;
+
+      allRows.forEach(row => {
+        const status = rs[row.key + '_status'] || 'pending';
+        
+        if (status !== 'paid') allPaid = false;
+
+        if (status === 'paid') {
+          recProfit += row.interest;
+        } else if (status === 'overdue') {
+          const amtOverride = rs[row.key + '_amount'];
+          const fee = (amtOverride !== undefined && amtOverride !== '') ? Number(amtOverride) : Math.ceil(row.principalPortion * 0.10) + row.interest;
+          recProfit += fee;
+        }
+      });
+
+      if (allPaid && allRows.length > 0) fullyPaidCount++;
+      
+      totalProfit += recProfit;
+      totalReleased += Math.round(Number(inputs.amount));
+    });
+
     $('kpiClients').textContent = String(savedRecords.length);
+    $('kpiFullyPaid').textContent = String(fullyPaidCount);
+    $('kpiMargin').textContent = totalReleased > 0 ? ((totalProfit / totalReleased) * 100).toFixed(1) + '%' : '0%';
 
     let dueThisMonth = 0, overdueUrgent = 0;
     entries.forEach(e => {
@@ -980,7 +1136,6 @@
       if (e.status === 'overdue') overdueUrgent++;
     });
     $('kpiDueMonth').textContent = money(dueThisMonth);
-    $('kpiOverdue').textContent = String(overdueUrgent);
 
     renderMonthlySummary();
     renderCalendar(entries);
@@ -1101,7 +1256,6 @@
           if (e.status === 'paid') entry.classList.add('paid');
           else if (e.status === 'overdue') entry.classList.add('overdue');
           entry.innerHTML = `<span class="entry-name">${escapeHtml(e.clientName)}</span><span class="entry-amount">${money(e.amount)}</span>`;
-          entry.title = `${e.clientName} · ${fmtShort(e.dueDate)} · ${money(e.amount)} · ${e.status}`;
           entry.addEventListener('click', (ev) => {
             ev.stopPropagation(); 
             switchTab('calculatorTab'); 
@@ -1110,8 +1264,8 @@
               currentRecordId = rec.id;
               recordState = rec.recordState ? { ...rec.recordState } : {};
               setFormInputs(rec.inputs);
-              render();
-              renderRecordsStrip();
+              renderAdmin();
+              renderRecordsGrid();
             }
           });
           cell.appendChild(entry);
@@ -1156,8 +1310,8 @@
           currentRecordId = rec.id;
           recordState = rec.recordState ? { ...rec.recordState } : {};
           setFormInputs(rec.inputs);
-          render();
-          renderRecordsStrip();
+          renderAdmin();
+          renderRecordsGrid();
         }
       });
       list.appendChild(item);
@@ -1170,35 +1324,33 @@
     if (tabId === 'summaryTab') renderSummaryTab();
   }
 
-  function deleteCurrentRecord() {
-    if (!currentRecordId) { alert('No record is currently loaded.'); return; }
-    const rec = savedRecords.find(r => r.id === currentRecordId);
-    const name = rec ? (rec.name || 'Unnamed client') : 'this record';
-    if (!confirm(`Delete “${name}”? This cannot be undone.`)) return;
-    deleteRecordFromSupabase(currentRecordId);
-  }
-
   function newRecord() {
     currentRecordId = null;
     recordState = {};
     clearForm();
-    render();
-    renderRecordsStrip();
+    renderAdmin();
+    renderRecordsGrid();
+    switchTab('calculatorTab'); // Jump straight to calculator to start typing
   }
 
   function bindEvents() {
+    ['pub_amount', 'pub_term', 'pub_frequency', 'pub_refdate'].forEach(id => {
+      $(id).addEventListener('input', renderPublic);
+      $(id).addEventListener('change', renderPublic);
+    });
+
     ['client','bankType','bankName','bankNumber','guarantor','refdate','amount','term','frequency','rate']
       .forEach(id => {
         const el = $(id);
-        el.addEventListener('input', render);
-        el.addEventListener('change', render);
+        el.addEventListener('input', renderAdmin);
+        el.addEventListener('change', renderAdmin);
       });
 
     $('amount').addEventListener('change', () => {
       let v = Math.round(Number($('amount').value));
       if (!Number.isFinite(v) || v < 1) v = 1;
       $('amount').value = String(v);
-      render();
+      renderAdmin();
     });
 
     $('printBtn').addEventListener('click', () => window.print());
@@ -1207,11 +1359,17 @@
       if (!confirm('Reset the current form? Unsaved changes will be lost.')) return;
       if (currentRecordId) {
         const rec = savedRecords.find(r => r.id === currentRecordId);
-        if (rec) { setFormInputs(rec.inputs); recordState = rec.recordState ? { ...rec.recordState } : {}; render(); return; }
+        if (rec) { setFormInputs(rec.inputs); recordState = rec.recordState ? { ...rec.recordState } : {}; renderAdmin(); return; }
       }
-      clearForm(); recordState = {}; render();
+      clearForm(); recordState = {}; renderAdmin();
     });
-    $('deleteRecordBtn').addEventListener('click', deleteCurrentRecord);
+    $('deleteRecordBtn').addEventListener('click', () => {
+      if (!currentRecordId) { alert('No record is currently loaded.'); return; }
+      const rec = savedRecords.find(r => r.id === currentRecordId);
+      const name = rec ? (rec.name || 'Unnamed client') : 'this record';
+      if (!confirm(`Delete “${name}”? This cannot be undone.`)) return;
+      deleteRecordFromSupabase(currentRecordId);
+    });
     $('newRecordBtn').addEventListener('click', newRecord);
 
     document.querySelectorAll('.tab-btn').forEach(btn => {
@@ -1233,17 +1391,20 @@
     });
   }
 
-  // INIT
   window.addEventListener('DOMContentLoaded', () => {
     const today = new Date();
-    $('refdate').value = localIso(today);
+    const iso = localIso(today);
+    
+    $('pub_refdate').value = iso;
+    renderPublic();
+
+    $('refdate').value = iso;
     const now = new Date(); calYear = now.getFullYear(); calMonth = now.getMonth();
+    renderAdmin();
 
     bindEvents();
-    render(); // renders the public calculator
-    checkAuth(); // checks login status and updates UI
+    checkAuth(); 
   });
-
 </script>
 </body>
 </html>
